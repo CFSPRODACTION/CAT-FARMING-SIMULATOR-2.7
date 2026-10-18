@@ -1,0 +1,956 @@
+<!DOCTYPE html>
+<html lang="uk"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
+<meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="screen-orientation" content="landscape"><meta name="x5-orientation" content="landscape">
+<title>Cat farming simulator 2.7</title>
+<style>
+:root{box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent;user-select:none}
+html,body{height:100%;margin:0;background:#1d1e33;color:#fff;font-family:"Courier New",monospace;overflow:hidden;touch-action:none}
+#app{height:100%;display:flex;flex-direction:column}
+#hud{display:flex;justify-content:space-between;padding:6px 10px;background:#1d1e33;font-weight:bold;font-size:14px;border-bottom:3px solid #ffd166}
+#wrap{flex:1;display:flex;align-items:center;justify-content:center;min-height:0;background:#79c97a;position:relative}
+canvas{image-rendering:pixelated;display:block;touch-action:none}
+#seeds{display:flex;gap:4px;padding:6px;background:#1d1e33;border-top:3px solid #ffd166}
+.sd{flex:1;background:#3d405b;border:3px solid #22223b;color:#fff;font-size:11px;padding:4px 0;text-align:center;line-height:1.2}
+.sd b{font-size:20px;display:block}.sd.sel{background:#ffd166;color:#22223b;border-color:#fff}.sd.lock{opacity:.4}
+#toast{position:absolute;top:8px;left:50%;transform:translateX(-50%);background:#000c;color:#ffd166;padding:5px 10px;font-size:12px;white-space:nowrap;opacity:0;transition:opacity .2s;pointer-events:none}
+#ov{position:absolute;inset:0;background:#000a;display:none;align-items:center;justify-content:center;padding:14px;z-index:5}
+#card{background:#fdf0d5;color:#22223b;border:4px solid #22223b;box-shadow:0 0 0 4px #ffd166;width:100%;max-width:400px;max-height:92%;overflow:auto;padding:10px}
+#card h2{margin:0 0 6px;font-size:15px;display:flex;justify-content:space-between}#card h4{margin:8px 0 3px;font-size:12px}
+.x{background:#ef476f;color:#fff;border:3px solid #22223b;font-family:inherit;font-weight:bold;width:30px;height:30px}
+.box{display:flex;flex-wrap:wrap;gap:4px;min-height:48px;background:#e9d8a6;border:3px solid #22223b;padding:4px}
+.it{background:#fff;border:3px solid #22223b;padding:2px 6px;font-size:12px;text-align:center;font-family:inherit;color:#22223b}.it b{font-size:20px;display:block}
+.big{width:100%;margin-top:8px;padding:10px;background:#06d6a0;border:3px solid #22223b;font-family:inherit;font-weight:bold;font-size:14px;color:#0b2b22}
+.big:disabled{background:#999;color:#666}
+.up{width:100%;margin-top:6px;padding:8px;background:#ffd166;border:3px solid #22223b;font-family:inherit;font-weight:bold;font-size:12px;color:#22223b;text-align:left}
+.up:disabled{background:#bbb;color:#777}
+#menu{position:fixed;inset:0;z-index:20;background:linear-gradient(#8fd3f4 0,#8fd3f4 35%,#79c97a 35%);display:none;align-items:center;justify-content:center;padding:16px}
+.mc{width:100%;max-width:340px;text-align:center}.mc h1{font-size:26px;margin:0 0 6px;color:#fff;text-shadow:3px 3px 0 #22223b;letter-spacing:1px}
+.mc p{background:#fdf0d5;color:#22223b;border:3px solid #22223b;padding:8px;font-size:13px;margin:8px 0}
+.mb{display:block;width:100%;margin-top:10px;padding:14px;background:#ffd166;border:4px solid #22223b;box-shadow:0 4px 0 #22223b;font-family:inherit;font-weight:bold;font-size:17px;color:#22223b}
+.mb.g{background:#06d6a0}.mb.r{background:#ef476f;color:#fff}.mb:active{transform:translateY(3px);box-shadow:0 1px 0 #22223b}.mb:disabled{background:#bbb;color:#777}.mb small{font-size:11px;font-weight:normal}
+.lb{position:absolute;transform:translate(-50%,-100%);background:#000a;color:#fff;font-size:11px;padding:2px 5px;border-radius:4px;pointer-events:none;white-space:nowrap;z-index:2}.lb.bb{font-size:18px;background:#fff;border:2px solid #22223b;color:#000;padding:0 3px}
+canvas{width:100%;height:100%}
+#nav{position:absolute;top:86px;left:6px;z-index:3;background:#000a;color:#ffd166;font-size:11px;padding:3px 6px;border-radius:4px;pointer-events:none}
+#info{position:absolute;top:42px;left:6px;z-index:3;background:#000a;color:#fff;font-size:11px;line-height:1.4;padding:3px 6px;border-radius:4px;pointer-events:none}
+#vig{position:absolute;inset:0;pointer-events:none;z-index:1;background:radial-gradient(ellipse at center,transparent 58%,rgba(0,0,0,.38))}
+#snd{position:absolute;top:6px;left:6px;z-index:3;width:38px;height:30px;background:#ffd166;border:3px solid #22223b;font-size:14px}
+#intro{position:fixed;inset:0;z-index:30;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px;text-align:center;color:#fff;background:#0b1030;transition:background 1.2s;cursor:pointer}
+.ia{font-size:68px;animation:fl 2.2s ease-in-out infinite}@keyframes fl{50%{transform:translateY(-12px)}}
+.it2{max-width:340px;font-size:16px;line-height:1.55;min-height:112px;margin-top:18px;text-shadow:2px 2px 0 #000a}
+.skip{position:absolute;top:calc(12px + env(safe-area-inset-top));right:14px;background:#0008;color:#fff;border:2px solid #fff8;padding:6px 10px;font-family:inherit}
+.dots{display:flex;gap:6px;margin-top:6px}.dots i{width:9px;height:9px;border-radius:50%;background:#fff5}.dots i.on{background:#ffd166}
+.tap{font-size:11px;opacity:.75;margin-top:14px;animation:bl 1.3s infinite}@keyframes bl{50%{opacity:.2}}
+.zb{position:absolute;top:84px;width:36px;height:30px;z-index:3;background:#ffd166;border:3px solid #22223b;font-weight:bold;font-size:16px;font-family:inherit}
+#menu{background:linear-gradient(#5ec3ff 0,#c6ecff 48%,#8fd06f 48%,#4a9e4f 100%);overflow:auto}
+#menu::before{content:"☀️";position:absolute;top:5%;right:10%;font-size:54px}
+#menu::after{content:"🌳🌻🌾🐄🌾🌻🌳";position:absolute;bottom:2%;left:0;right:0;text-align:center;font-size:28px}
+.mc{position:relative;z-index:1}.logo{font-size:50px;filter:drop-shadow(0 4px 0 #22223b66)}.mc h1{font-size:34px}
+.sub{color:#22223b;font-weight:bold;font-size:12px;margin-bottom:6px}
+.chips{display:flex;gap:6px;justify-content:center;flex-wrap:wrap;margin:8px 0}.chips span{background:#fdf0d5;border:3px solid #22223b;padding:3px 8px;font-size:13px;font-weight:bold;color:#22223b}.chips .red{background:#ef476f;color:#fff}
+.help{background:#fdf0d5;color:#22223b;border:3px solid #22223b;text-align:left;padding:8px;font-size:12px;line-height:1.55;max-height:62vh;overflow:auto}
+#joy{position:absolute;left:14px;bottom:14px;width:110px;height:110px;border-radius:50%;background:#0006;border:3px solid #fff8;display:none;z-index:3;touch-action:none}
+#knob{position:absolute;left:30px;top:30px;width:50px;height:50px;border-radius:50%;background:#ffd166;border:3px solid #22223b;pointer-events:none}
+#exitv,#horn{position:absolute;right:14px;display:none;z-index:3;width:56px;height:56px;border-radius:50%;border:3px solid #22223b;background:#ef476f;font-size:24px}#exitv{bottom:80px}#horn{bottom:146px;background:#ffd166}#bag,#run{position:absolute;bottom:14px;z-index:3;width:56px;height:56px;border-radius:50%;border:3px solid #22223b;background:#06d6a0;font-size:24px}#bag{right:14px}#run{right:80px;background:#ffd166}#run.on{background:#ef476f}.tb{flex:1;padding:6px;border:3px solid #22223b;background:#ddd;font-family:inherit;font-weight:bold;font-size:12px}.tb.on{background:#ffd166}.row2{display:flex;gap:4px;margin-bottom:6px}.sw{display:inline-block;width:14px;height:14px;border:2px solid #22223b;vertical-align:middle}.it.on{background:#ffd166}.it:disabled{opacity:.45}
+#mm{position:absolute;top:6px;right:6px;width:182px;height:70px;border:2px solid #22223b;image-rendering:pixelated;opacity:.93;z-index:3;pointer-events:none;background:#79c97a}
+
+.pd{position:absolute;z-index:3;display:none;width:70px;height:70px;border-radius:50%;border:3px solid #22223b;background:#ffffffdd;font-size:26px;touch-action:none}.pd.big{width:82px;height:82px;background:#06d6a0}.pd.on{filter:brightness(.75)}
+#bl{left:14px;bottom:22px}#br{left:94px;bottom:22px}#bg{right:14px;bottom:106px}#bb{right:14px;bottom:22px;background:#ef476f}#exitv{right:100px;bottom:22px}#horn{right:100px;bottom:88px}
+#spd{position:absolute;bottom:100px;left:50%;transform:translateX(-50%);z-index:3;background:#000b;color:#ffd166;padding:3px 10px;border-radius:12px;font-size:13px;font-weight:bold;display:none}
+#mm{pointer-events:auto;cursor:pointer}
+.row2{flex-wrap:wrap}.tb{font-size:11px;padding:6px 2px;min-width:30%}
+.gr{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}.cd{position:relative;background:#fff;border:3px solid #22223b;text-align:center;padding:6px 2px;font-size:11px;color:#22223b}.cd b{font-size:26px;display:block}.cd small{display:block}.cd.em{opacity:.4}.cd .bd{position:absolute;top:-6px;right:-6px;background:#ef476f;color:#fff;border-radius:10px;min-width:22px;padding:1px 4px;font-weight:bold}
+.sum{background:#22223b;color:#ffd166;padding:6px;text-align:center;font-size:13px;margin-bottom:4px}.hint{font-size:11px;margin-top:8px;opacity:.8}.stl{display:flex;justify-content:space-between;border-bottom:1px dashed #22223b55;padding:4px 2px;font-size:13px}
+#splash{position:fixed;inset:0;z-index:50;background:#000;display:flex;align-items:center;justify-content:center;transition:opacity .8s;text-align:center}
+.cat{font-size:76px;animation:crun 2.2s ease-out both}@keyframes crun{0%{transform:translateX(-160px) scale(.5);opacity:0}50%{opacity:1}100%{transform:none}}
+.paws span{display:inline-block;font-size:20px;opacity:0;margin:4px;animation:fi 1s forwards}.paws span:nth-child(1){animation-delay:.3s}.paws span:nth-child(2){animation-delay:.7s}.paws span:nth-child(3){animation-delay:1.1s}
+.st1{font-size:34px;font-weight:bold;letter-spacing:4px;color:#ffd166;opacity:0;transform:translateY(14px);animation:fi 1.2s 1s forwards;text-shadow:0 0 20px #ffd16699}
+.st2{font-size:22px;color:#fff;letter-spacing:6px;opacity:0;transform:translateY(14px);animation:fi 1.2s 1.7s forwards}@keyframes fi{to{opacity:1;transform:none}}
+.bar{width:190px;height:6px;background:#222;border-radius:3px;margin:26px auto 0;overflow:hidden}.bar i{display:block;height:100%;width:0;background:linear-gradient(90deg,#ffd166,#ef476f);animation:ld 3.4s .2s forwards}@keyframes ld{to{width:100%}}
+#prod{position:fixed;inset:0;z-index:60;background:#000;display:flex;align-items:center;justify-content:center;transition:opacity .8s}
+.pt{color:#fff;font-size:30px;font-weight:bold;letter-spacing:8px;text-align:center;opacity:0;animation:pf 2.4s .5s ease-in forwards;text-shadow:0 0 18px #ffffff88}@keyframes pf{to{opacity:1}}
+#splash:not(.go) *{animation-play-state:paused}
+
+/* 2.7: landscape */
+#menu{align-items:flex-start;justify-content:flex-start}#menu .mc{margin:auto}
+#rot{position:fixed;inset:0;z-index:45;background:#0b1030;color:#fff;display:none;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:24px;touch-action:auto}
+#rot .ri{font-size:72px;animation:rr 2.4s ease-in-out infinite}@keyframes rr{0%,20%{transform:rotate(0)}65%,100%{transform:rotate(-90deg)}}
+#rot p{max-width:300px;font-size:16px;line-height:1.5;margin:14px 0 18px}
+#rot button{background:#ffd166;color:#22223b;border:3px solid #22223b;padding:8px 14px;font-family:inherit;font-weight:bold;font-size:13px}
+@media (orientation:landscape) and (max-height:520px){
+ #hud{padding:2px 10px;font-size:12px;border-bottom-width:2px}
+ #seeds{padding:3px;gap:3px;border-top-width:2px}.sd{font-size:9px;padding:1px 0;line-height:1.1;border-width:2px}.sd b{font-size:15px}
+ .mc{max-width:520px}.logo{font-size:30px}.mc h1{font-size:22px!important}.sub{font-size:11px;margin-bottom:2px}.mb{padding:7px;font-size:14px;margin-top:6px;border-width:3px}.mc p{padding:4px;margin:4px 0;font-size:12px}.chips{margin:4px 0}
+ .help{max-height:55vh}#card{max-height:96%}
+ .ia{font-size:44px}.it2{min-height:64px;font-size:14px;margin-top:8px}
+}
+
+</style></head><body>
+<div id="app"><div id="hud"><span>🪙 <span id="coins">0</span></span><span id="lv"></span><span id="clk"></span><span onclick="menu('main')" style="font-size:18px">☰</span></div>
+<div id="wrap"><canvas id="c"></canvas><div id="vig"></div><div id="info"></div><div id="nav"></div><button id="snd">🔊</button><button class="zb" id="zin" style="right:46px">＋</button><button class="zb" id="zout" style="right:6px">－</button><canvas id="mm" width="182" height="70"></canvas><div id="joy"><div id="knob"></div></div><div id="spd"></div><button class="pd" id="bl">◀</button><button class="pd" id="br">▶</button><button class="pd big" id="bg">⬆</button><button class="pd" id="bb">⬇</button><button id="exitv">🚪</button><button id="horn">📯</button><button id="bag">🎒</button><button id="run">🏃</button><div id="toast"></div><div id="ov"><div id="card"></div></div></div>
+<div id="seeds"></div></div>
+<div id="menu"></div><div id="intro"></div><div id="rot"><div class="ri">📱</div><p>Cat Farming Simulator грають <b>горизонтально</b>.<br>Поверни телефон, щоб почати 🐱</p><button id="rotok">Все одно грати так</button></div><div id="prod"><div class="pt">CFS PRODUCTION</div></div><div id="splash"><div class="sl"><div class="cat">🐱</div><div class="paws"><span>🐾</span><span>🐾</span><span>🐾</span></div><div class="st1">CAT FARMING</div><div class="st2">SIMULATOR 2.7</div><div class="bar"><i></i></div></div></div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+const CROPS=[
+ {id:'carrot',n:'Морква',e:'🥕',cost:5,t:6,p:12,col:'#f77f00',need:1},
+ {id:'tomato',n:'Томат',e:'🍅',cost:12,t:10,p:30,col:'#e63946',need:1},
+ {id:'straw',n:'Полуниця',e:'🍓',cost:25,t:16,p:70,col:'#ff4d6d',need:2},
+ {id:'pump',n:'Гарбуз',e:'🎃',cost:60,t:26,p:180,col:'#ff9e00',need:3},
+ {id:'apple',n:'Яблуко',e:'🍎',cost:150,t:40,p:450,col:'#d00000',need:4}];
+const ANIMALS={
+ hen:{n:'Курка',e:'🐔',pr:'egg',pe:'🥚',cost:40,t:12,p:9,need:1,home:0},
+ sheep:{n:'Вівця',e:'🐑',pr:'wool',pe:'🧶',cost:150,t:25,p:38,need:2,home:1},
+ cow:{n:'Корова',e:'🐄',pr:'milk',pe:'🥛',cost:300,t:35,p:70,need:3,home:1},
+ pig:{n:'Свиня',e:'🐖',pr:'truffle',pe:'🍄',cost:450,t:45,p:120,need:4,home:1}};
+const ITEMS=[...CROPS.map(c=>({id:c.id,e:c.e,p:c.p})),...Object.values(ANIMALS).map(a=>({id:a.pr,e:a.pe,p:a.p})),{id:'fish',e:'🐟',p:45},{id:'wheat',e:'🌾',p:8},{id:'mush',e:'🍄',p:14},{id:'berry',e:'🫐',p:11},{id:'rock',e:'🪨',p:9},{id:'meat',e:'🥩',p:32},{id:'bread',e:'🍞',p:40},{id:'roast',e:'🍖',p:110},{id:'pie',e:'🥧',p:85},{id:'bakedm',e:'🍲',p:55},{id:'omelet',e:'🍳',p:35}];
+const MAXP=24,TW=46,TH=36,VW=180,VH=290,WW=14000,WH=3600;
+const fresh=()=>({coins:20000,house:1,kiosk:1,plots:4,sel:0,inv:{},grid:Array(MAXP).fill(null),an:[],debt:0,veh:{car:1},vspd:0,fx:[0,0,0],fw:[Array(16).fill(0),Array(16).fill(0),Array(16).fill(0)],gun:0,ammo:0,bake:null,ord:null,ordD:-1,gt:0,paid:0,season:0,sT:0,cl:{own:['hat0','hat9','top0','pn0','acc0'],worn:{hat:'hat0',top:'top0',pants:'pn0',acc:'acc0'}},wheat:Array(16).fill(0)});
+let S=fresh(),NEWG=0;
+try{const s=localStorage.getItem('pixfarm3');if(s)S=Object.assign(fresh(),JSON.parse(s));else NEWG=1}catch(e){}
+const save=()=>{try{localStorage.setItem('pixfarm3',JSON.stringify(S))}catch(e){}};
+const $=id=>document.getElementById(id);
+const speed=()=>(1+0.2*(S.house-1))*(RAIN&&S.season!==3?1.25:1)*[1.15,1,1,.6][S.season||0],mult=()=>1+0.25*(S.kiosk-1);
+const cv=$('c');
+const pp=i=>({x:12+(i%6)*50,y:104+Math.floor(i/6)*44});
+const cam={x:0,y:0};
+function toast(t){const e=$('toast');e.textContent=t;e.style.opacity=1;clearTimeout(toast.t);toast.t=setTimeout(()=>e.style.opacity=0,2000)}
+function fit(){const w=$('wrap');const s=Math.max(1,Math.floor(Math.min(w.clientWidth/VW,w.clientHeight/VH)*4)/4);cv.style.width=VW*s+'px';cv.style.height=VH*s+'px'}
+addEventListener('resize',fit);
+const R=(x,y,w,h,c)=>{g.fillStyle=c;g.fillRect(Math.round(x),Math.round(y),w,h)};
+let seed=7;const rnd=()=>(seed=(seed*16807)%2147483647)/2147483647;
+const tufts=[],flowers=[],trees=[];
+for(let i=0;i<120;i++)tufts.push([rnd()*WW|0,(90+rnd()*390)|0]);
+for(let i=0;i<30;i++)flowers.push([rnd()*WW|0,(86+rnd()*390)|0,['#fff','#ffd166','#ff8fab','#b8c0ff'][i%4]]);
+[[90,56],[170,60],[200,56],[290,60],[310,300],[6,480-30],[150,300]].forEach(t=>trees.push(t));
+const P={x:90,y:92,tx:null,ty:null,act:null,dir:1,f:0,fish:0};
+const dog={x:70,y:96,d:1},bf=[0,1,2,3].map(i=>({x:40+i*70,y:120+i*50,p:i*2}));
+const floats=[];
+const say=(t,x,y,c)=>floats.push({t,x,y,c:c||'#fff',a:0});
+function go(x,y,act){P.fish=0;P.tx=Math.max(8,Math.min(WW-8,x));P.ty=Math.max(84,Math.min(WH-4,y));P.act=act||null}
+function input(e){
+ const r=cv.getBoundingClientRect(),mx=(e.clientX-r.left)*VW/r.width+cam.x,my=(e.clientY-r.top)*VH/r.height+cam.y;
+ if(e.type==='pointerdown'){
+  for(const a of S.an)if(Math.abs(mx-a.x)<11&&my<a.y+3&&my>a.y-18)return go(a.x,a.y+4,{k:'animal'});
+  if(mx>6&&mx<80&&my<86)return go(40,86,{k:'house'});
+  if(mx>100&&mx<178&&my<86)return go(138,86,{k:'kiosk'});
+  if(mx>222&&mx<306&&my>40&&my<96)return go(264,102,{k:'fish'});
+  for(const L of LAKES)if(Math.hypot(mx-L.x,my-L.y)<L.r)return go(L.sx,L.sy,{k:'fish',L});
+  if(mx>10&&mx<80&&my>290&&my<346)return go(45,352,{k:'coop'});
+  if(mx>236&&mx<312&&my>286&&my<346)return go(274,352,{k:'barn'});
+  for(let i=0;i<MAXP;i++){const {x,y}=pp(i);if(mx>=x&&mx<x+TW&&my>=y&&my<y+TH)return go(x+TW/2,y+TH+3,{k:'plot',i})}
+ }
+ go(mx,my);
+}
+// 2.6: multi-touch — pinch to zoom with two fingers; extra fingers never trigger stray taps
+const TP=new Map();let pz0=0,zm0=1.75;
+const tpd=()=>{const a=[...TP.values()];return a.length<2?0:(Math.hypot(a[0].x-a[1].x,a[0].y-a[1].y)||1)};
+cv.addEventListener('pointerdown',e=>{if($('ov').style.display==='flex')return;try{cv.setPointerCapture(e.pointerId)}catch(_){}
+ TP.set(e.pointerId,{x:e.clientX,y:e.clientY});
+ if(TP.size>=2){cv.dn=0;P.tx=null;P.act=null;pz0=tpd();zm0=ZM;return}
+ if(KS.l||KS.r||KS.g||KS.b)return;
+ cv.dn=1;input(e)});
+cv.addEventListener('pointermove',e=>{const q=TP.get(e.pointerId);if(!q)return;q.x=e.clientX;q.y=e.clientY;
+ if(TP.size>=2){const d=tpd();if(pz0>0)ZM=Math.max(1,Math.min(3.2,zm0*pz0/d));return}
+ if(cv.dn&&P.act==null)input(e)});
+const tpe=e=>{TP.delete(e.pointerId);cv.dn=0;if(TP.size>=2){pz0=tpd();zm0=ZM}};
+cv.addEventListener('pointerup',tpe);cv.addEventListener('pointercancel',tpe);cv.addEventListener('lostpointercapture',tpe);
+addEventListener('gesturestart',e=>e.preventDefault());
+const ready=a=>(Date.now()-a.s)/1000*speed()>=ANIMALS[a.t].t;
+function arrive(a){
+ if(a.k==='kiosk')return openKiosk();
+ if(a.k==='house')return openHouse();
+ if(a.k==='coop')return openBuy(0);
+ if(a.k==='barn')return openBuy(1);
+ if(a.k==='fish'){P.fish=2.5;P.dir=1;return toast('Риболовля... 🎣')}
+ if(a.k==='animal'){
+  const c=S.an.filter(n=>Math.hypot(n.x-P.x,n.y-P.y)<24&&ready(n))[0];
+  if(!c)return toast(S.an.some(n=>Math.hypot(n.x-P.x,n.y-P.y)<24)?'Ще не готово':'Втекла! 😄');
+  const A=ANIMALS[c.t];S.inv[A.pr]=(S.inv[A.pr]||0)+1;c.s=Date.now();say('+1 '+A.pe,c.x-8,c.y-20);ui();save();return}
+ const i=a.i,{x,y}=pp(i),p=S.grid[i],now=Date.now();
+ if(i>=S.plots){
+  if(i!==S.plots)return toast('Спочатку відкрий попередню грядку');
+  const c=plotCost();if(S.coins<c)return toast('Треба '+c+' 🪙 на грядку');
+  S.coins-=c;S.plots++;say('Нова грядка!',x+4,y,'#ffd166');
+ }else if(!p){
+  const c=CROPS[S.sel];
+  if(S.house<c.need)return toast('Потрібен дім рівня '+c.need);
+  if(S.coins<c.cost)return toast('Не вистачає монет');
+  S.coins-=c.cost;S.grid[i]={c:S.sel,s:now};say('-'+c.cost,x+14,y,'#ff9e9e');
+ }else{
+  const c=CROPS[p.c];
+  if((now-p.s)/1000*speed()>=c.t){S.inv[c.id]=(S.inv[c.id]||0)+1;S.grid[i]=null;say('+1 '+c.e,x+10,y)}
+  else toast('Ще росте...');
+ }
+ ui();save();
+}
+const plotCost=()=>Math.round(30*Math.pow(1.45,S.plots-4));
+const houseCost=()=>Math.round(150*Math.pow(2.3,S.house-1));
+const kioskCost=()=>Math.round(80*Math.pow(1.7,S.kiosk-1));
+const cnt=t=>S.an.filter(a=>a.t===t).length;
+const price=t=>ANIMALS[t].cost+cnt(t)*ANIMALS[t].cost/4|0;
+let counter={};
+function showCard(h){$('card').innerHTML=h;$('ov').style.display='flex'}
+function closeCard(){$('ov').style.display='none';counter={};P.tx=null}
+window.closeCard=closeCard;
+function openKiosk(){
+ const inv=ITEMS.filter(c=>(S.inv[c.id]||0)-(counter[c.id]||0)>0),on=ITEMS.filter(c=>counter[c.id]);
+ let tot=0;on.forEach(c=>tot+=Math.round(counter[c.id]*c.p*mult()));
+ showCard(`<h2>🏪 Кіоск (ціни ×${mult().toFixed(2)})<button class="x" onclick="closeCard()">X</button></h2>
+ <h4>🧺 КОМОРА — тапни, щоб покласти на прилавок</h4>
+ <div class="box">${inv.length?inv.map(c=>`<button class="it" onclick="put('${c.id}',1)"><b>${c.e}</b>×${S.inv[c.id]-(counter[c.id]||0)}<br>${Math.round(c.p*mult())}🪙</button>`).join(''):'<i>Порожньо</i>'}</div>
+ <button class="up" style="text-align:center" onclick="putAll()">⬇️ Покласти все</button>
+ <h4>🪧 ПРИЛАВОК — тапни, щоб забрати назад</h4>
+ <div class="box" style="background:#d4a373">${on.length?on.map(c=>`<button class="it" onclick="put('${c.id}',-1)"><b>${c.e}</b>×${counter[c.id]}</button>`).join(''):'<i>Пусто</i>'}</div>
+ <button class="big" ${tot?'':'disabled'} onclick="sellNow()">ПРОДАТИ ЗА ${tot} 🪙</button>`);
+}
+window.put=(id,d)=>{counter[id]=Math.max(0,Math.min(S.inv[id]||0,(counter[id]||0)+d));openKiosk()};
+window.putAll=()=>{ITEMS.forEach(c=>counter[c.id]=S.inv[c.id]||0);openKiosk()};
+window.sellNow=()=>{let t=0;ITEMS.forEach(c=>{const q=counter[c.id]||0;if(q){t+=Math.round(q*c.p*mult());S.inv[c.id]-=q}});
+ S.coins+=t;say('+'+t+' 🪙',P.x-10,P.y-24,'#ffd166');ui();save();closeCard();toast('Продано за '+t+' 🪙')};
+function openBuy(home){
+ const L=Object.keys(ANIMALS).filter(k=>ANIMALS[k].home===home);
+ showCard(`<h2>${home?'🏚️ Ферма тварин':'🐔 Курник'}<button class="x" onclick="closeCard()">X</button></h2>
+ ${L.map(k=>{const A=ANIMALS[k],c=price(k),full=cnt(k)>=(home?8:14),lk=S.house<A.need;
+ return `<button class="up" ${full||lk||S.coins<c?'disabled':''} onclick="buyA('${k}')">${A.e} ${A.n} (є: ${cnt(k)}) → ${A.pe} кожні ~${A.t}с, ${A.p}🪙<br>${lk?'🔒 дім рівня '+A.need:full?'МАКС':c+' 🪙'}</button>`}).join('')}
+ <h4 style="font-size:11px">Тапай на тварину з бульбашкою, щоб забрати продукт.</h4>`);
+}
+window.buyA=k=>{const A=ANIMALS[k],c=price(k);S.coins-=c;const x=A.home?170+Math.random()*130:20+Math.random()*120;
+ S.an.push({t:k,x,y:380+Math.random()*70,tx:x,ty:400,d:1,w:0,s:Date.now()});ui();save();openBuy(A.home);toast(A.e+' купила!')};
+function openHouse(){
+ const hm=S.house>=5,km=S.kiosk>=9;
+ showCard(`<h2>🏠 Мій дім<button class="x" onclick="closeCard()">X</button></h2><p style="font-size:12px;margin:4px 0">📅 День ${Math.floor(S.gt/900)+1} · оренда ${RENT} 🪙 через ${Math.ceil((2700-S.gt%2700)/900)} дн. (спишеться сама)</p>
+ <button class="up" ${hm||S.coins<houseCost()?'disabled':''} onclick="upg('house')">🏠 Дім (Lv${S.house}) — ріст +20%, нові рослини і тварини<br>${hm?'МАКСИМУМ':houseCost()+' 🪙'}</button>
+ <button class="up" ${km||S.coins<kioskCost()?'disabled':''} onclick="upg('kiosk')">🏪 Кіоск (Lv${S.kiosk}) — ціни +25%<br>${km?'МАКСИМУМ':kioskCost()+' 🪙'}</button>
+ <button class="up" style="background:#ddd;text-align:center" onclick="if(confirm('Почати заново?')){S=fresh();save();ui();closeCard()}">Почати заново</button>`);
+}
+window.upg=k=>{if(k==='house'){S.coins-=houseCost();S.house++}else{S.coins-=kioskCost();S.kiosk++}ui();save();openHouse();toast('Покращено! ✨')};
+function ui(){
+ $('coins').textContent=S.coins;$('lv').textContent=(S.debt?'💳'+S.debt+' ':'')+'🏠'+S.house+' 🏪'+S.kiosk+' 🌾'+S.plots+' 🐾'+S.an.length;
+ $('seeds').innerHTML=CROPS.map((c,i)=>{const l=S.house<c.need;return `<div class="sd ${i===S.sel?'sel':''} ${l?'lock':''}" data-i="${i}"><b>${l?'🔒':c.e}</b>${l?'дім '+c.need:c.cost+'🪙'}<br>${S.inv[c.id]?'📦'+S.inv[c.id]:'&nbsp;'}</div>`}).join('');
+}
+$('seeds').addEventListener('pointerdown',e=>{const d=e.target.closest('.sd');if(!d)return;const c=CROPS[+d.dataset.i];if(S.house<c.need)return toast('Потрібен дім рівня '+c.need);S.sel=+d.dataset.i;ui();save()});
+let T2=0,last=performance.now(),T=320,lastFish=0;
+function frame(t){
+ const dt=Math.min(.05,(t-last)/1000);last=t;T+=dt;
+ if(P.fish>0&&$('ov').style.display!=='flex'){P.fish-=dt;if(P.fish<=0){if(Math.random()<.75){S.inv.fish=(S.inv.fish||0)+1;say('+1 🐟',P.x,P.y-24);ui();save()}else toast('Зірвалась 🐟')}}
+ else if(P.tx!=null){
+  const dx=P.tx-P.x,dy=P.ty-P.y,d=Math.hypot(dx,dy);
+  if(d<2){P.tx=null;P.f=0;if(P.act){const a=P.act;P.act=null;arrive(a)}}
+  else{const s=(P.veh?(VT[P.veh].sp+35*(S.vspd||0)):70*(P.run?1.7:1))*(drv?JM:1)*dt;P.x+=dx/d*Math.min(s,d);P.y+=dy/d*Math.min(s,d);P.f+=dt*10;if(Math.abs(dx)>1)P.dir=dx>0?1:-1}
+ }
+ if(S.debt>0){T2+=dt;if(T2>=60){T2=0;S.debt=Math.ceil(S.debt*1.03);ui();save()}}
+ const dd=Math.hypot(P.x-dog.x,P.y-dog.y);if(dd>16){dog.x+=(P.x-dog.x)*dt*2.2;dog.y+=(P.y-dog.y)*dt*2.2;dog.d=P.x>dog.x?1:-1}
+ S.an.forEach(a=>{
+  if(a.w>0){a.w-=dt;return}
+  const d=Math.hypot(a.tx-a.x,a.ty-a.y);
+  if(d<1.5){a.w=1+Math.random()*3;const h=ANIMALS[a.t].home;a.tx=(h?165:12)+Math.random()*(h?145:140);a.ty=350+Math.random()*115}
+  else{const s=(a.t==='hen'?16:10)*dt;a.x+=(a.tx-a.x)/d*s;a.y+=(a.ty-a.y)/d*s;a.d=a.tx>a.x?1:-1}
+ });
+ cam.x=Math.max(0,Math.min(WW-VW,P.x-VW/2));cam.y=Math.max(0,Math.min(WH-VH,P.y-VH*.55));
+ draw(Date.now(),T);requestAnimationFrame(frame);
+}
+
+const ren=new THREE.WebGLRenderer({canvas:cv,antialias:true});ren.setPixelRatio(Math.min(devicePixelRatio,2));ren.shadowMap.enabled=true;ren.shadowMap.type=THREE.PCFSoftShadowMap;
+const scene=new THREE.Scene(),camr=new THREE.PerspectiveCamera(48,.6,.1,150),V=(x,y,z)=>new THREE.Vector3(x,y,z);
+scene.fog=new THREE.Fog(0x8fd3f4,50,130);
+const hemi=new THREE.HemisphereLight(0xffffff,0x4a7a4a,.85),sun=new THREE.DirectionalLight(0xfff2cc,.9);
+scene.add(hemi,sun,sun.target);sun.castShadow=true;sun.shadow.mapSize.set(2048,2048);Object.assign(sun.shadow.camera,{left:-30,right:30,top:30,bottom:-30,near:1,far:120});
+const camLook=V(9,0,9);camr.position.set(9,13,20);
+function fit(){const w=$('wrap');ren.setSize(w.clientWidth,w.clientHeight);camr.aspect=w.clientWidth/w.clientHeight;camr.updateProjectionMatrix()}
+const MM={},M=c=>MM[c]||(MM[c]=new THREE.MeshLambertMaterial({color:c}));
+const add=(m,p,x,y,z)=>{m.position.set(x,y,z);m.castShadow=m.receiveShadow=true;(p||scene).add(m);return m};
+const B=(w,h,d,c,x,y,z,p)=>add(new THREE.Mesh(new THREE.BoxGeometry(w,h,d),M(c)),p,x,y,z);
+const Sp=(r,c,x,y,z,p)=>add(new THREE.Mesh(new THREE.SphereGeometry(r,10,8),M(c)),p,x,y,z);
+const Cn=(r,h,c,x,y,z,p,sg)=>add(new THREE.Mesh(new THREE.ConeGeometry(r,h,sg||8),M(c)),p,x,y,z);
+const Cy=(rt,rb,h,c,x,y,z,p)=>add(new THREE.Mesh(new THREE.CylinderGeometry(rt,rb,h,10),M(c)),p,x,y,z);
+const G=(x,y,z,p)=>{const g=new THREE.Group();g.position.set(x,y,z);(p||scene).add(g);return g};
+const gr=new THREE.Mesh(new THREE.PlaneGeometry(1500,380),M(0x79c97a));gr.rotation.x=-Math.PI/2;gr.position.set(700,-.06,180);gr.receiveShadow=true;scene.add(gr);
+[[2,-6,8],[14,-9,11],[28,-6,9],[40,-8,9],[-8,-7,8]].forEach(([x,z,h],i)=>Cn(h*.8,h,i%2?0x5fb264:0x6bbf6f,x,h/2,z,scene,6));
+[[9.5,4],[19,4.5],[21,3],[30,6],[31,30],[1,46],[31,46]].forEach(([x,z])=>{Cy(.2,.25,1.4,0x7b4a2a,x,.7,z);Cn(1.1,1.8,0x2d9e3f,x,2.1,z);Cn(.8,1.4,0x3cb44f,x,3.1,z)});
+flowers.filter(f=>!(f[0]<214&&f[1]>96&&f[1]<292)).forEach(([x,y,c])=>{B(.05,.3,.05,0x3d8b47,x*.1,.15,y*.1);Sp(.13,c,x*.1,.35,y*.1)});
+Cy(4,4,.15,0x4da3e0,26.4,.08,6.8);Cy(4.5,4.5,.1,0x5a8f4a,26.4,.04,6.8);for(let i=0;i<5;i++)B(.1,1,.1,0x3cb44f,23.4+i*.3,.5,5.2+i%2*.2);
+[[4,.03,8.9,.8,1.8],[9,.03,9.6,10,.8],[13.8,.03,8.7,.8,1.4],[26.4,.03,9.7,.8,1],[15.5,.03,31.3,1,8.2],[16,.03,34.9,24,.8]].forEach(([x,y,z,w,d])=>B(w,.06,d,0xe0b98a,x,y,z));
+// house
+const winM=new THREE.MeshLambertMaterial({color:0xbde0fe,emissive:0}),hg=G(4.3,0,5.6),hw=B(6.6,3.2,4.8,0xd9a066,0,1.6,0,hg);
+const rf=Cn(4.9,2.2,0xb23a48,0,4.3,0,hg,4);rf.rotation.y=Math.PI/4;rf.scale.z=.72;B(.7,1.6,.7,0x7a4b3a,2,4.3,-1,hg);B(1.2,2,.1,0x5a3825,0,1,2.45,hg);
+[-2,2].forEach(x=>{const w=B(1.2,1.1,.1,0,x,1.9,2.45,hg);w.material=winM});
+// kiosk
+const kg=G(13.9,0,6.3),st=[];B(7,2.6,3.4,0xe9c46a,0,1.3,0,kg);B(5.8,.5,1.2,0x6d4c2f,0,1.3,1.9,kg);
+for(let i=0;i<7;i++){const m=B(1,.15,2.6,0xffffff,-3+i,3,1.4,kg);m.rotation.x=.35;st.push(m)}
+[0xe63946,0x06d6a0,0xffd166].forEach((c,i)=>B(.8,.5,.8,c,-1.6+i*1.6,1.7,1.9,kg));B(3.6,.8,.2,0x5a3825,0,4,.5,kg);
+// coop, barn
+const cg=G(4.4,0,32.3);B(6,2.6,3.8,0xb5651d,0,1.3,0,cg);const cr=Cn(4.6,2,0x8f2d3a,0,3.6,0,cg,4);cr.rotation.y=Math.PI/4;cr.scale.z=.7;B(1.2,1.8,.1,0x3e2616,0,.9,1.95,cg);
+const bg=G(27.4,0,32.1);B(6.8,3.4,4.2,0xc1121f,0,1.7,0,bg);const br=Cn(5.2,2.6,0x7a0c14,0,4.6,0,bg,4);br.rotation.y=Math.PI/4;br.scale.z=.7;B(2.4,2.4,.1,0x5a1a1a,0,1.2,2.15,bg);B(.15,2.4,.12,0xffffff,0,1.2,2.2,bg);
+// fences
+for(let x=.2;x<40;x+=1)if(x<14.3||x>16.7)B(.15,.9,.15,0xc08552,x,.45,28.4);B(14.4,.15,.12,0xa8703d,7.2,.6,28.4);B(23.4,.15,.12,0xa8703d,28.3,.6,28.4);[14.4,16.6].forEach(x=>{B(.3,1.5,.3,0x8b5e3c,x,.75,28.4);B(.34,.12,.34,0xffd166,x,1.55,28.4)});
+for(let z=36;z<48;z+=1)B(.15,.9,.15,0xc08552,15.7,.45,z);B(.12,.15,12,0xa8703d,15.7,.6,42);
+for(let x=.2;x<32;x+=1)B(.15,.7,.15,0xc08552,x,.35,47.8);
+// plots
+function crop(g,c,s){const C=CROPS[c];[-1,1].forEach(d=>{const h=[.3,.8,1.3,1.3][s];Cy(.05,.07,h,0x2d9e3f,d,h/2,0,g);
+ if(s>=1){B(.5,.1,.25,0x57cc6a,d-.3,h*.6,0,g);B(.5,.1,.25,0x57cc6a,d+.3,h*.5,0,g)}
+ if(s===3){[[-.35,.45,-.3],[.35,.5,.3],[0,1.4,0]].forEach(([x,y,z])=>Sp(.28,C.col,d+x,y,z,g))}})}
+const PL=[];for(let i=0;i<MAXP;i++){const p=pp(i),g=G((p.x+23)*.1,0,(p.y+18)*.1);PL.push({g,soil:B(4.6,.3,3.6,0x7b4a2a,0,.15,0,g),cg:G(0,.3,0,g),bar:B(4,.12,.15,0xffd166,0,.38,1.95,g),key:''})}
+// people
+function human(c1,c2,hc,hair){const g=G(0,0,0);g.tp=[];g.pn=[];g.ht=[];
+ const l=[-1,1].map(x=>{const q=G(x*.2,.7,0,g);g.pn.push(B(.3,.7,.3,c2,0,-.35,0,q));B(.34,.16,.46,0x2b1d12,0,-.68,.06,q);return q}),a=[-1,1].map(x=>{const q=G(x*.55,1.45,0,g);g.tp.push(B(.25,.7,.25,c1,0,-.3,0,q));B(.22,.2,.22,0xffcf9f,0,-.75,0,q);return q});
+ g.tp.push(B(.8,.8,.5,c1,0,1.1,0,g));g.pn.push(B(.82,.4,.52,c2,0,.9,0,g));B(.84,.08,.54,0x5a3825,0,.78,0,g);B(.6,.6,.6,0xffcf9f,0,1.75,0,g);B(.64,.16,.64,hair||0x4a2f1a,0,2.04,-.02,g);
+ [-1,1].forEach(x=>{B(.1,.1,.05,0xffffff,x*.15,1.8,.31,g);B(.05,.05,.05,0x222222,x*.15,1.8,.34,g)});B(.08,.1,.08,0xe8b08a,0,1.72,.34,g);B(.22,.04,.04,0xb5524a,0,1.6,.31,g);
+ g.ht.push(Cy(.55,.55,.08,hc,0,2.1,0,g),Cy(.3,.3,.3,hc,0,2.28,0,g));g.l=l;g.a=a;return g}
+function swing(g,m,f){const s=m?Math.sin(f*1.4)*.8:0;g.l[0].rotation.x=s;g.l[1].rotation.x=-s;g.a[0].rotation.x=-s;g.a[1].rotation.x=s}
+const player=human(0xe63946,0x3a86ff,0xe9c46a);
+const dogm=G(0,0,0);B(.5,.45,1.1,0xc08552,0,.5,0,dogm);B(.45,.45,.45,0xc08552,0,.75,.7,dogm);B(.12,.25,.1,0x7a4b3a,.2,1.05,.7,dogm);B(.12,.25,.1,0x7a4b3a,-.2,1.05,.7,dogm);B(.12,.12,.4,0xa8703d,0,.7,-.65,dogm);
+[-1,1].forEach(x=>[-1,1].forEach(z=>B(.12,.3,.12,0xa8703d,x*.17,.15,z*.4,dogm)));
+const NPCS=[{n:'👴 Дід Іван',x:240,y:130,t:'gift',c:[0x3a7d44,0x555555,0x999999],lines:['Добрий день, фермере!','Кури люблять зерно, а корови сіно.','Дощ буде — гарний врожай!']},
+ {n:'👩 Марія',x:270,y:112,t:'buy',c:[0xb5838d,0x6d597a,0xff8fab],lines:['Я купую свіжі продукти!']},
+ {n:'🧑‍🍳 Тарас',x:180,y:100,t:'gift',c:[0xdddddd,0x333333,0xffffff],lines:['Пахне свіжим хлібом!','Продавай овочі в кіоску.','Не бери зайвих кредитів 😉']}];
+NPCS.forEach(n=>{n.g=human(...n.c);scene.add(n.g);n.w=1;n.tx=n.x;n.ty=n.y;n.f=0;n.cd=0});
+const WP=[[230,95],[280,95],[310,95],[160,96],[200,96],[250,96]];
+const _ar=arrive;arrive=function(a){const k=a.k;
+ if(k==='npc')return talk(a.n);
+ if(k==='bld')return enterRoom(a.room,a.ex,a.ey);if(k==='rcount')return openSupply(ROOM);if(k==='roven')return openOven();if(k==='fbuy')return openFieldBuy(a.i);
+ if(k==='shop')return openShop();
+ if(k==='fish')FT=a.L?V(a.L.bx,.3,a.L.bz):V(26.4,.3,7.8);
+ if(k==='forage'){const f=a.f;if(f.t)return;f.t=1;f.m.visible=false;const id=FI[f.k][0];S.inv[id]=(S.inv[id]||0)+1;say('+1 '+FI[f.k][1],f.x,f.y-20);setTimeout(()=>{f.t=0;f.m.visible=true},150000);ui();save();return}
+ if(k==='house'){dismount();return enterRoom('house',40,92)}
+ if(k==='veh')return mount(a.v);
+ if(k==='idoor')return leave();
+ if(k==='ibed'){{const c=Math.floor(T/900)*900,o=T;T=(T%900<300?c:c+900)+301;S.gt+=T-o;save()}return toast('😴 Виспався! Настав ранок ☀️')}
+ if(k==='itable')return openHouse();
+ if(k==='ishelf')return menu('bank');
+ if(k==='iward')return openBag('shop');
+ return _ar(a)};
+function talk(n){const L=n.lines[Math.random()*n.lines.length|0],now=Date.now();
+ if(n.buys){let q=0,g=0;n.buys.forEach(id=>{const c=ITEMS.find(i=>i.id===id),k=S.inv[id]||0;q+=k;g+=Math.round(k*c.p*mult()*1.6);S.inv[id]=0});if(!q)return toast(n.n+': принеси '+n.buys.map(id=>ITEMS.find(i=>i.id===id).e).join('')+' — куплю дорожче!');S.coins+=g;say('+'+g+' 🪙',n.x,n.y-20,'#ffd166');ui();save();return toast(n.n+' купив ×'+q+' за '+g+' 🪙 (+60%)')}
+ if(n.t==='buy'){const l=ITEMS.filter(c=>S.inv[c.id]>0);if(!l.length)return toast(n.n+': нема що купити 😅');const c=l[Math.random()*l.length|0],q=S.inv[c.id],g=Math.round(q*c.p*mult()*1.3);S.inv[c.id]=0;S.coins+=g;say('+'+g+' 🪙',n.x,n.y-20,'#ffd166');ui();save();return toast(n.n+' купила '+c.e+'×'+q+' за '+g+' 🪙 (+30%)')}
+ if(now-n.cd<45000)return toast(n.n+': '+L);n.cd=now;const g=5+Math.random()*25|0;S.coins+=g;say('+'+g+' 🪙',n.x,n.y-20,'#ffd166');ui();save();toast(n.n+': '+L+' (+'+g+' 🪙)')}
+// animals
+const AM=new Map(),legs4=(g,c,h,x,z)=>[-1,1].forEach(a=>[-1,1].forEach(b=>B(.15,h,.15,c,a*x,h/2,b*z,g)));
+function mk(t){const g=G(0,0,0);
+ if(t==='hen'){B(.5,.45,.7,0xffffff,0,.45,0,g);B(.4,.4,.2,0xeeeeee,0,.6,-.4,g);B(.3,.3,.3,0xffffff,0,.8,.38,g);B(.08,.15,.2,0xe63946,0,1,.38,g);B(.12,.08,.15,0xf9a03f,0,.78,.58,g);[-1,1].forEach(x=>B(.06,.25,.06,0xf9a03f,x*.12,.12,0,g))}
+ else if(t==='sheep'){B(.9,.7,1.3,0xf5f5f5,0,.75,0,g);B(.7,.3,1.1,0xffffff,0,1.15,0,g);B(.4,.4,.45,0x3a3a3a,0,.9,.85,g);legs4(g,0x3a3a3a,.4,.3,.45)}
+ else if(t==='pig'){B(.8,.6,1.2,0xffb3c1,0,.6,0,g);B(.5,.5,.45,0xffb3c1,0,.75,.8,g);B(.25,.2,.15,0xff8fab,0,.7,1.07,g);B(.15,.15,.1,0xff8fab,.2,1.05,.8,g);B(.15,.15,.1,0xff8fab,-.2,1.05,.8,g);legs4(g,0xff8fab,.3,.25,.4)}
+ else{B(1,.9,1.7,0xffffff,0,1,0,g);B(1.02,.4,.5,0x222222,0,1.2,-.4,g);B(.6,.3,.6,0x222222,0,1.5,.3,g);B(.6,.6,.6,0xffffff,0,1.3,1.1,g);B(.4,.25,.1,0xffb3c1,0,1.15,1.42,g);B(.1,.2,.1,0xdddddd,.25,1.65,1.1,g);B(.1,.2,.1,0xdddddd,-.25,1.65,1.1,g);legs4(g,0xffffff,.5,.35,.6)}
+ return g}
+// misc
+const cl=[0,1,2,3].map(i=>{const g=G(0,15+i,-8-i*3);B(4,.8,2,0xffffff,0,0,0,g);B(2.5,.8,1.5,0xffffff,.5,.6,0,g);return g});
+const bfl=[0,1,2,3].map(i=>B(.25,.03,.2,['#ff8fab','#ffd166','#b8c0ff','#ffffff'][i]?[0xff8fab,0xffd166,0xb8c0ff,0xffffff][i]:0xffffff,0,1,0));
+const fl=new THREE.Line(new THREE.BufferGeometry().setFromPoints([V(0,0,0),V(1,1,1)]),new THREE.LineBasicMaterial({color:0xffffff})),bob=Sp(.15,0xe63946,26.4,.2,7.8);scene.add(fl);
+const LB=[];let lbi=0;
+function lab(txt,v,cls,al,col){let e=LB[lbi];if(!e){e=document.createElement('div');$('wrap').appendChild(e);LB[lbi]=e}lbi++;
+ const p=v.clone().project(camr);if(p.z>1||Math.abs(p.x)>1.15||Math.abs(p.y)>1.15){e.style.display='none';return}
+ e.className='lb '+(cls||'');e.style.display='block';e.textContent=txt;e.style.left=(p.x+1)/2*cv.clientWidth+'px';e.style.top=(1-p.y)/2*cv.clientHeight+'px';e.style.opacity=al==null?1:al;e.style.color=col||''}
+function face(m,x,z,dt,r){if(m.ox===undefined){m.ox=x;m.oz=z}const dx=x-m.ox,dz=z-m.oz;m.ox=x;m.oz=z;const mv=Math.hypot(dx,dz)>.002;
+ if(mv){let d=Math.atan2(dx,dz)-m.rotation.y;d=Math.atan2(Math.sin(d),Math.cos(d));m.rotation.y+=d*Math.min(1,dt*(r||10))}return mv}
+
+// interior, vehicles, wheat
+let IN=false;const IG=(x,y,z)=>V(100+x,y,100+z),ig=G(100,0,100);
+B(8,.2,8,0xc9a66b,4,-.1,4,ig);Cy(2,2,.04,0xb5838d,4,.03,4,ig);
+[[8,3.5,.3,4,1.75,-.15],[.3,3.5,8,-.15,1.75,4],[.3,3.5,8,8.15,1.75,4],[3,.7,.3,1.5,.35,8.15],[3,.7,.3,6.5,.35,8.15]].forEach(([w,h,d,x,y,z])=>B(w,h,d,0xf1e3c8,x,y,z,ig));
+B(2,1.6,.08,0x5a3825,4,2.2,.05,ig);B(1.7,1.3,.1,0,4,2.2,.1,ig).material=winM;B(2,.04,.9,0x7a4b3a,4,.05,7.6,ig);
+B(2,.4,2.8,0x8b5e3c,1.3,.3,1.6,ig);B(1.8,.3,2.6,0xffffff,1.3,.65,1.6,ig);B(1.8,.35,1.5,0x3a86ff,1.3,.75,2.2,ig);B(1.2,.2,.6,0xffd166,1.3,.9,.6,ig);
+B(2.6,.15,1.4,0x8d5524,6,1,1.6,ig);[[-1.2,-.6],[1.2,-.6],[-1.2,.6],[1.2,.6]].forEach(([x,z])=>B(.15,1,.15,0x6d4c2f,6+x,.5,1.6+z,ig));
+Cy(.3,.3,.05,0xffffff,5.4,1.1,1.6,ig);Sp(.17,0xd00000,6.5,1.22,1.6,ig);B(.7,.5,.7,0x6d4c2f,4.6,.25,1.6,ig);B(.7,.5,.7,0x6d4c2f,7.4,.25,1.6,ig);
+B(1,2.4,2.2,0x6d4c2f,7.4,1.2,5,ig);Sp(.45,0xffb3c1,7.4,2.85,5,ig);[0xe63946,0x3a86ff,0xffd166].forEach((c,i)=>B(.1,.5,.5,c,6.85,1.6,4.3+i*.5,ig));
+B(1.5,1,1.4,0x9a9a9a,1,.5,5.2,ig);B(1.5,.06,1.4,0x333333,1,1.02,5.2,ig);Cy(.3,.3,.4,0xb5651d,1,1.25,5.2,ig);Cy(.3,.25,.5,0xb5651d,.7,.25,7.2,ig);Cn(.5,1.3,0x2d9e3f,.7,1.1,7.2,ig);
+const ipl=new THREE.PointLight(0xffd9a0,.8,16);ipl.position.set(4,3.2,4);ig.add(ipl);ig.visible=false;
+const _go=go;go=function(x,y,a){if(IN){P.fish=0;P.tx=Math.max(1008,Math.min(1072,x));P.ty=Math.max(1012,Math.min(1076,y));P.act=a||null}else _go(x,y,a)};
+function enter(){IN=true;ig.visible=true;P.fish=0;P.x=1040;P.y=1064;P.tx=null;P.act=null;dog.x=1030;dog.y=1060;cat.x=1020;cat.y=1066;camr.position.set(104,10.5,112);camLook.set(104,0,104.5);toast('🏠 Вдома: ліжко — спати, стіл — прокачка, скарбничка — банк')}
+function leave(){IN=false;ig.visible=false;P.x=40;P.y=92;P.tx=null;P.act=null;dog.x=50;dog.y=96;cat.x=30;cat.y=100;camr.position.set(4,13*ZM,9+11*ZM);camLook.set(4,0,9)}
+const wh=(r,w,x,y,z,g)=>{Cy(r,r,w,0x222222,x,y,z,g).rotation.z=Math.PI/2};
+function mkT(){const g=G(0,0,0);B(1.3,.8,2.2,0xd62828,0,.85,.3,g);B(.9,.7,1,0xd62828,0,1,1.4,g);B(1.2,1.2,1.1,0x90e0ef,0,1.9,-.2,g);B(1.4,.1,1.3,0x222222,0,2.55,-.2,g);Cy(.07,.07,.9,0x333333,.35,1.9,1.4,g);
+ wh(.75,.4,.85,.75,-.5,g);wh(.75,.4,-.85,.75,-.5,g);wh(.4,.3,.8,.4,1.3,g);wh(.4,.3,-.8,.4,1.3,g);Sp(.25,0xffcf9f,0,1.9,-.2,g);Cy(.3,.3,.08,0xe9c46a,0,2.2,-.2,g);return g}
+function mkC(){const g=G(0,0,0);B(2.2,1.5,3.4,0x2a9d3f,0,1.4,-.2,g);B(1.6,1.2,1.3,0x90e0ef,0,2.6,1.1,g);B(1.8,.1,1.5,0x222222,0,3.25,1.1,g);B(2,.8,2,0x2a9d3f,0,2.5,-1.2,g);B(3.8,.5,1.2,0xffd60a,0,.55,2.5,g);
+ const r=G(0,.9,2.5,g);Cy(.35,.35,3.4,0xe9a000,0,0,0,r).rotation.z=Math.PI/2;B(3.4,.1,.3,0xc1121f,0,.4,0,r);B(3.4,.1,.3,0xc1121f,0,-.4,0,r);
+ wh(.75,.5,1.2,.75,.9,g);wh(.75,.5,-1.2,.75,.9,g);wh(.5,.4,1,.5,-1.4,g);wh(.5,.4,-1,.5,-1.4,g);Sp(.25,0xffcf9f,0,2.6,1.1,g);g.reel=r;return g}
+const VEH={tractor:{g:mkT(),x:600,y:190},combine:{g:mkC(),x:600,y:222}};VEH.combine.reel=VEH.combine.g.reel;
+const WF=[];for(let i=0;i<16;i++){const g=G((360+(i%4)*46+21)*.1,0,(150+(i>>2)*44+19)*.1);B(4.2,.15,4,0x7b5a2a,0,.07,0,g);WF.push({m:B(3.8,1,3.6,0xe0b83a,0,.5,0,g)})}
+function mount(k){if(P.veh)return;const v=VEH[k];if(Math.hypot(P.x-v.x,P.y-v.y)>36)return toast('Підійди ближче');P.veh=k;DH=VEH[k].g.rotation.y;DV=0;toast(k==='car'?'🚗 Поїхали в Октаву на схід по дорозі! Тапни по собі, щоб зійти':k==='tractor'?'🚜 Їдь по порожніх грядках — садить насіння. Тапни по собі, щоб зійти':'🌾 Їдь по готових грядках і пшениці — збирає. Тапни по собі, щоб зійти')}
+function dismount(){if(!P.veh)return;const v=VEH[P.veh];v.x=P.x;v.y=P.y;P.veh=null;P.x=Math.min(P.x+14,WW-8);P.tx=null;P.act=null}
+function vehBtns(){return [['tractor','🚜 Трактор',400,2,'сам садить вибране насіння'],['combine','🌾 Комбайн',1000,3,'сам збирає урожай і пшеницю']].map(([k,n,c,nd,d])=>S.veh[k]?`<button class="up" disabled>${n} — є ✅</button>`:`<button class="up" ${S.house<nd||S.coins<c?'disabled':''} onclick="buyV('${k}',${c})">${n} — ${d}<br>${S.house<nd?'🔒 дім рівня '+nd:c+' 🪙'}</button>`).join('')}
+window.buyV=(k,c)=>{S.coins-=c;S.veh[k]=1;{const q={tractor:[600,190],combine:[600,222],car:[600,254]}[k]||[600,254];VEH[k].x=q[0];VEH[k].y=q[1]}ui();save();openShop();toast('Техніка чекає біля салону! 🚜')};
+
+// shop, controls, minimap
+const sg=G(70,0,20);sg.rotation.y=Math.PI;B(6.4,3,5,0xdfe7ee,0,1.5,0,sg);B(5.6,2,.1,0,0,1.3,2.55,sg).material=winM;B(7,.3,5.6,0x3a86ff,0,3.15,0,sg);B(4.6,.9,.2,0x22223b,0,4.1,2.4,sg);
+{const a=mkT();a.scale.setScalar(.6);a.position.set(-1.7,3.3,0);a.rotation.y=.5;sg.add(a);const b=mkC();b.scale.setScalar(.5);b.position.set(1.7,3.3,0);b.rotation.y=-.5;sg.add(b)}
+B(7.4,.06,2.4,0x6a6a70,70,.03,16.4);
+function openShop(){const c=Math.round(300*Math.pow(2,S.vspd||0)),mx=(S.vspd||0)>=3;
+ showCard(`<h2>🚗 Автосалон<button class="x" onclick="closeCard()">X</button></h2>${vehBtns()}<button class="up" ${mx||S.coins<c?'disabled':''} onclick="tune(${c})">⚡ Тюнінг двигуна (Lv${S.vspd||0}) — швидкість техніки +30%<br>${mx?'МАКСИМУМ':c+' 🪙'}</button><h4 style="font-size:11px">Куплена техніка чекає біля салону. Тапни по ній, щоб сісти. Керуй джойстиком ліворуч (або WASD/стрілки).</h4>`)}
+window.tune=c=>{S.coins-=c;S.vspd=(S.vspd||0)+1;ui();save();openShop()};
+let jx=0,jy=0,drv=0,JM=1;const keys={},joy=$('joy'),kn=$('knob');
+function jset(e){const r=joy.getBoundingClientRect();let dx=(e.clientX-r.left-r.width/2)/45,dy=(e.clientY-r.top-r.height/2)/45;const m=Math.hypot(dx,dy);if(m>1){dx/=m;dy/=m}jx=dx;jy=dy;kn.style.left=30+dx*30+'px';kn.style.top=30+dy*30+'px'}
+const jend=()=>{jx=jy=0;kn.style.left='30px';kn.style.top='30px'};
+joy.addEventListener('pointerdown',e=>{joy.setPointerCapture(e.pointerId);jset(e)});
+joy.addEventListener('pointermove',e=>{if(joy.hasPointerCapture(e.pointerId))jset(e)});
+joy.addEventListener('pointerup',jend);joy.addEventListener('pointercancel',jend);
+addEventListener('keydown',e=>keys[e.key.toLowerCase()]=1);addEventListener('keyup',e=>keys[e.key.toLowerCase()]=0);
+$('exitv').onclick=()=>dismount();
+$('horn').onclick=()=>{try{const a=new(window.AudioContext||window.webkitAudioContext)(),o=a.createOscillator(),n=a.createGain();o.type='square';o.frequency.value=330;o.connect(n);n.connect(a.destination);n.gain.value=.08;o.start();setTimeout(()=>o.frequency.value=262,150);setTimeout(()=>{o.stop();a.close()},420)}catch(e){}};
+function drive(){if(!P.veh)return;let x=jx,y=jy;if(keys.arrowleft||keys.a)x-=1;if(keys.arrowright||keys.d)x+=1;if(keys.arrowup||keys.w)y-=1;if(keys.arrowdown||keys.s)y+=1;const m=Math.hypot(x,y);
+ if(m>.15){drv=1;JM=Math.min(1,m);if(P.fish>0)P.fish=0;P.act=null;const nx=P.x+x/m*80,ny=P.y+y/m*80;P.tx=IN?Math.max(1008,Math.min(1072,nx)):Math.max(8,Math.min(WW-8,nx));P.ty=IN?Math.max(1012,Math.min(1076,ny)):Math.max(84,Math.min(WH-4,ny))}else if(drv){drv=0;P.tx=null}}
+const mmc=$('mm').getContext('2d');
+function minimap(now){const mm=$('mm');if(IN){mm.style.display='none';return}mm.style.display='block';OX=Math.max(0,Math.min(WW-2600,P.x-1300));OY=Math.max(0,Math.min(WH-1000,P.y-500));const g=mmc,f=.07,Q=(x,y,w,h,c)=>{g.fillStyle=c;g.fillRect(Math.round((x-OX)*f),Math.round((y-OY)*f),Math.max(1,Math.round(w*f)),Math.max(1,Math.round(h*f)))};
+ Q(OX,OY,2600,1000,'#79c97a');Q(OX,0,2600,62,'#8fd3f4');Q(380,380,980,600,'#4f9a58');Q(320,103,1580,44,'#666666');ROADS.forEach(r=>r.h?Q(r.a*10,r.c*10-22,(r.b-r.a)*10,44,'#666666'):Q(r.c*10-22,r.a*10,44,(r.b-r.a)*10,'#666666'));VILL.forEach(v=>Q((v[0]-v[2]/2)*10,(v[1]-v[3]/2)*10,v[2]*10,v[3]*10,'#c9b79c'));Q(2160,103,11000,44,'#666666');Q(12100,40,700,260,'#9a9a9a');Q(12100,281,660,34,'#666666');Q(12100,359,660,34,'#666666');Q(6780,103,44,2900,'#666666');Q(5580,103,44,3300,'#666666');Q(1620,281,660,34,'#666666');Q(1620,359,660,34,'#666666');Q(1927,180,34,290,'#666666');Q(1815,180,26,118,'#666666');Q(2035,180,26,118,'#666666');Q(1700,40,520,260,'#9a9a9a');Q(2250,150,190,180,'#d9b44a');Q(2250,480,190,180,'#d9b44a');Q(2250,810,190,180,'#d9b44a');Q(1000,200,200,200,'#4da3e0');Q(550,500,140,140,'#4da3e0');Q(210,760,180,180,'#4da3e0');LK2.forEach(l=>Q((l[0]-l[2])*10,(l[1]-l[2])*10,l[2]*20,l[2]*20,'#4da3e0'));Q(222,44,84,50,'#4da3e0');Q(155,272,6,80,'#e0b98a');
+ Q(10,32,66,48,'#c77d3f');Q(104,46,70,34,'#e63946');Q(14,304,60,38,'#b5651d');Q(240,300,68,42,'#c1121f');Q(668,175,64,50,'#3a86ff');FARMS.forEach((fm,i)=>{const X=(fm.x*10-OX)*f,Y=(fm.z*10-OY)*f,c=S.fm[i]?'#06d6a0':'#ffd166';g.fillStyle=c;if(X>=0&&X<182&&Y>=0&&Y<70)g.fillRect(X-3,Y-3,6,6);else g.fillRect(Math.max(3,Math.min(179,X))-2,Math.max(3,Math.min(67,Y))-2,5,5)});
+ for(let i=0;i<MAXP;i++){const q=pp(i),p=S.grid[i];Q(q.x,q.y,TW,TH,i>=S.plots?'#5f8f5a':!p?'#7b4a2a':((now-p.s)/1000*speed()>=CROPS[p.c].t?'#ffd166':'#57cc6a'))}
+ S.wheat.forEach((w,i)=>Q(360+(i%4)*46,150+(i>>2)*44,42,38,(now-w)/1000*speed()>=30?'#e0b83a':'#8fbf4a'));
+ S.an.forEach(a=>Q(a.x-3,a.y-3,8,8,'#ffffff'));NPCS.forEach(n=>Q(n.x-4,n.y-4,10,10,'#ff8fab'));
+ for(const k in VEH)if(S.veh[k])Q(VEH[k].x-20,VEH[k].y-20,40,40,'#e63946');
+ Q(P.x-25,P.y-25,50,50,'#000000');Q(P.x-18,P.y-18,36,36,Math.floor(now/350)%2?'#ffff00':'#ffffff');
+ g.strokeStyle='#ffffff';g.lineWidth=1;g.strokeRect(Math.round((camLook.x*10-OX)*f-9),Math.round((camLook.z*10-OY)*f-11),18,22)}
+
+let ZM=1.75;const zset=d=>{ZM=Math.max(1,Math.min(3.2,ZM+d))};$('zin').onclick=()=>zset(-.25);$('zout').onclick=()=>zset(.25);
+$('wrap').addEventListener('wheel',e=>{zset(e.deltaY>0?.15:-.15)});
+[70,84,100].forEach((x,i)=>Cn(9+i*2,12+i*3,i%2?0x5fb264:0x6bbf6f,x*.62+10,6+i*1.5,-8-i*2,scene,6));
+function menu(v){const m=$('menu');
+ if(v==='bank')return menuOld(v);
+ m.style.display='flex';
+ if(v==='help'){m.innerHTML=`<div class="mc"><h1>📖 Як грати</h1><div class="help">
+ 👆 <b>Тапни по землі</b> — фермер іде туди.<br>🌱 <b>Грядка</b>: обери насіння внизу, тапни — посадиш; коли виросло — тапни і збереш.<br>🏪 <b>Кіоск</b>: клади продукти на прилавок і продавай.<br>🐔 <b>Тварини</b>: тапни по тварині з бульбашкою — забереш яйця, молоко, вовну.<br>🎣 <b>Ставок</b>: тапни — риболовля.<br>🏠 <b>Дім</b>: зайди — ліжко (спати), стіл (прокачка), скарбничка (банк).<br>👥 <b>Жителі</b>: поговори — дарують монети, Марія купує дорожче.<br>🚜 <b>Техномаркет</b> праворуч від дому по дорозі: зайди всередину — трактори, комбайни, фури, авто й тюнінг. Куплена техніка стоїть на стоянці за магазином.<br>🚜 <b>Техніка</b>: тапни по ній, щоб сісти. Кермо ◀ ▶ ліворуч, ⬆ газ і ⬇ гальмо/задній хід праворуч, 🚪 — вийти, 📯 — сигнал. Тап по міні-карті — іти/їхати туди. Трактор сам садить, комбайн сам збирає.<br>🗺 <b>Міні-карта</b> справа вгорі, ＋/－ — масштаб (або щипок двома пальцями). 🖐 Мультитач: у техніці можна тримати кермо й газ одночасно.<br>🎒 <b>Інвентар</b>: речі й одяг (новий одяг — у шафі вдома). 🏃 — біг. Кіт 🐱 приносить монети.<br>🍂 <b>Пори року</b> міняються кожні 20 хв (навесні рослини ростуть швидше, взимку повільніше). 🏠 <b>Оренда</b> 1500 🪙 кожні 3 дні: списується сама, а якщо не вистачить — іде в борг.</div>
+ <button class="mb r" onclick="menu('main')">← Назад</button></div>`;return}
+ m.innerHTML=`<div class="mc"><div class="logo">🐱🚜🌾</div><h1 style="font-size:27px;line-height:1.1">CAT FARMING<br>SIMULATOR</h1><div class="sub">Вирощуй • Торгуй • Розвивайся<br>оновлення 2.7 «Горизонт»</div>
+ <div class="chips"><span>🪙 ${S.coins}</span><span>🏠 ${S.house}</span><span>🏪 ${S.kiosk}</span><span>🐾 ${S.an.length}</span>${S.debt?'<span class="red">💳 '+S.debt+'</span>':''}</div>
+ <button class="mb g" onclick="$('menu').style.display='none'">▶ ГРАТИ</button>
+ <button class="mb" onclick="menu('bank')">💳 КРЕДИТ</button>
+ <button class="mb" onclick="menu('help')">📖 ЯК ГРАТИ</button>
+ <button class="mb r" onclick="if(confirm('Почати заново? Прогрес буде втрачено.')){S=fresh();dress();save();ui();menu('main')}">Нова гра</button></div>`}
+window.menu=menu;
+
+// clothes, bag, cat, far lands
+while(S.wheat.length<16)S.wheat.push(0);
+const CL=[
+ {id:'hat0',s:'hat',n:"Солом'яний капелюх",c:0xe9c46a,p:0},{id:'hat9',s:'hat',n:'Без капелюха',c:0,p:0,none:1},{id:'hat1',s:'hat',n:'Червоний кашкет',c:0xe63946,p:60},{id:'hat2',s:'hat',n:'Ковбойський',c:0x7a4b3a,p:150},{id:'hat3',s:'hat',n:'Котячі вушка',c:0xffa53a,p:200,ears:1},{id:'hat4',s:'hat',n:'Золота корона',c:0xffd700,p:500},
+ {id:'top0',s:'top',n:'Червона футболка',c:0xe63946,p:0},{id:'top1',s:'top',n:'Синя футболка',c:0x3a86ff,p:40},{id:'top2',s:'top',n:'Зелена футболка',c:0x2a9d3f,p:40},{id:'top3',s:'top',n:'Жовта футболка',c:0xffd166,p:60},{id:'top4',s:'top',n:'Рожева футболка',c:0xff8fab,p:80},{id:'top5',s:'top',n:'Чорне худі',c:0x2b2b2b,p:150},
+ {id:'pn0',s:'pants',n:'Синій комбінезон',c:0x3a86ff,p:0},{id:'pn1',s:'pants',n:'Джинси',c:0x2b3a67,p:40},{id:'pn2',s:'pants',n:'Хакі',c:0x9c8f4a,p:60},{id:'pn3',s:'pants',n:'Чорні штани',c:0x222222,p:80},{id:'pn4',s:'pants',n:'Рожеві штани',c:0xff8fab,p:120},
+ {id:'acc0',s:'acc',n:'Без аксесуарів',c:0,p:0,none:1},{id:'acc1',s:'acc',n:'Сонцезахисні окуляри',c:0x111111,p:120,gl:1},{id:'acc2',s:'acc',n:'Червоний шарф',c:0xe63946,p:90,sc:1}];
+player.ex={ears:[-1,1].map(x=>Cn(.14,.35,0xffa53a,x*.25,2.2,0,player,4)),sc:B(.95,.22,.65,0xe63946,0,1.5,0,player),gl:B(.58,.13,.06,0x111111,0,1.8,.33,player)};
+function dress(){const W=S.cl.worn,f=id=>CL.find(c=>c.id===id)||{c:0xffffff,none:1},h=f(W.hat),t=f(W.top),p=f(W.pants),a=f(W.acc);
+ player.tp.forEach(m=>m.material=M(t.c));player.pn.forEach(m=>m.material=M(p.c));
+ player.ht.forEach(m=>{m.visible=!h.none&&!h.ears;if(h.c)m.material=M(h.c)});
+ player.ex.ears.forEach(m=>m.visible=!!h.ears);player.ex.sc.visible=!!a.sc;player.ex.gl.visible=!!a.gl}
+const SL={hat:['🎩','Капелюхи'],top:['👕','Верх'],pants:['👖','Низ'],acc:['🕶','Аксесуари']},hx=c=>'#'+c.toString(16).padStart(6,'0');
+function openBagOld(t){t=t||'items';
+ const tabs=`<div class="row2">${[['items','🎒 Речі'],['cl','👕 Одяг'],['veh','🚜 Техніка'],['st','📊 Стат.'],['shop','🛍 Шафа']].map(([k,n])=>`<button class="tb ${t===k?'on':''}" onclick="openBag('${k}')">${n}</button>`).join('')}</div>`;let h;
+ if(t==='items'){const l=ITEMS.filter(c=>S.inv[c.id]>0);let tot=0;l.forEach(c=>tot+=S.inv[c.id]*Math.round(c.p*mult()));
+  h=`<h4>Комора (вартість ≈ ${tot} 🪙)</h4><div class="box">${l.length?l.map(c=>`<div class="it"><b>${c.e}</b>×${S.inv[c.id]}</div>`).join(''):'<i>Порожньо</i>'}</div><h4>Техніка</h4><div class="box">${S.veh.tractor?'<div class="it"><b>🚜</b>Трактор</div>':''}${S.veh.combine?'<div class="it"><b>🌾</b>Комбайн</div>':''}${!S.veh.tractor&&!S.veh.combine?'<i>Немає</i>':''}</div><h4>🐾 ${S.an.length} | 🌾 грядок ${S.plots} | 💳 борг ${S.debt||0}</h4>`}
+ else if(t==='shop'&&!IN)h='<div class="box"><i>Одяг продається вдома, у шафі 👕. Зайди в дім!</i></div>';
+ else h=['hat','top','pants','acc'].map(s=>`<h4>${SL[s][0]} ${SL[s][1]}</h4><div class="box">${CL.filter(c=>c.s===s&&(t==='shop')!==S.cl.own.includes(c.id)).map(c=>`<button class="it ${S.cl.worn[s]===c.id?'on':''}" ${t==='shop'&&S.coins<c.p?'disabled':''} onclick="${t==='shop'?'buyC':'wear'}('${t==='shop'?c.id:s+"','"+c.id}')"><b>${SL[s][0]}</b><span class="sw" style="background:${hx(c.c)}"></span><br>${c.n}${t==='shop'?'<br>'+c.p+'🪙':''}</button>`).join('')||'<i>Усе куплено ✅</i>'}</div>`).join('');
+ showCard(`<h2>🎒 Інвентар<button class="x" onclick="closeCard()">X</button></h2>${tabs}${t==='shop'&&IN?'<h4>🪙 '+S.coins+'</h4>':''}${h}`)}
+window.openBag=openBag;
+window.wear=(s,id)=>{S.cl.worn[s]=id;dress();save();openBag('cl')};
+window.buyC=id=>{const c=CL.find(q=>q.id===id);if(S.coins<c.p)return;S.coins-=c.p;S.cl.own.push(id);S.cl.worn[c.s]=id;dress();ui();save();openBag('shop')};
+$('bag').onclick=()=>openBag('items');$('run').onclick=()=>{P.run=!P.run;$('run').classList.toggle('on',!!P.run)};
+B(1.1,2.6,1.2,0x8b5e3c,.75,1.3,3.7,ig);B(.05,1.4,.7,0x9fd8f0,1.31,1.4,3.7,ig);B(.06,2.2,.05,0x5a3825,1.32,1.3,3.7,ig);
+const catm=G(0,0,0),cat={x:60,y:100,t:0};B(.4,.35,.8,0xf4a03a,0,.4,0,catm);B(.38,.34,.34,0xf4a03a,0,.7,.5,catm);B(.14,.08,.05,0xff8fab,0,.66,.69,catm);
+[-1,1].forEach(x=>{Cn(.09,.2,0xf4a03a,x*.12,.97,.5,catm,4);B(.05,.05,.02,0x222222,x*.09,.74,.68,catm);[-1,1].forEach(z=>B(.1,.25,.1,0xe08a2a,x*.14,.12,z*.28,catm))});
+const ctail=B(.1,.1,.6,0xf4a03a,0,.6,-.65,catm);
+function catUpdate(dt){const tx=P.x-22,ty=P.y+14;if(Math.hypot(tx-cat.x,ty-cat.y)>10){cat.x+=(tx-cat.x)*Math.min(1,dt*2);cat.y+=(ty-cat.y)*Math.min(1,dt*2)}
+ catm.position.set(cat.x*.1,0,cat.y*.1);face(catm,cat.x*.1,cat.y*.1,dt);ctail.rotation.y=Math.sin(T*6)*.5;
+ cat.t+=dt;if(cat.t>90){cat.t=0;S.coins+=8;say('🐁 +8🪙',cat.x,cat.y-14,'#ffd166');ui();save()}}
+for(let i=0;i<28;i++){const x=rnd()*78,z=rnd()<.5?50+rnd()*13:34+rnd()*15;if(x<33&&z<50)continue;Cy(.2,.25,1.4,0x7b4a2a,x,.7,z);Cn(1.1,1.8,0x2d9e3f,x,2.1,z);Cn(.8,1.4,0x3cb44f,x,3.1,z)}
+Cy(7,7,.15,0x4da3e0,62,.08,57);Cy(7.5,7.5,.1,0x5a8f4a,62,.04,57);
+dress();
+
+// atmosphere: sky, weather, lamps, sound, intro
+let RAIN=0,rt=0;const sky=new THREE.Group();scene.add(sky);
+const sp=new Float32Array(900);for(let i=0;i<300;i++){const a=rnd()*6.28,e=.15+rnd()*1.3,r=90;sp[i*3]=Math.cos(a)*Math.cos(e)*r;sp[i*3+1]=Math.sin(e)*r;sp[i*3+2]=Math.sin(a)*Math.cos(e)*r}
+const sgm=new THREE.BufferGeometry();sgm.setAttribute('position',new THREE.BufferAttribute(sp,3));const starM=new THREE.PointsMaterial({color:0xffffff,size:2,transparent:true,opacity:0,fog:false,sizeAttenuation:false});sky.add(new THREE.Points(sgm,starM));
+const moon=new THREE.Mesh(new THREE.SphereGeometry(4,16,12),new THREE.MeshBasicMaterial({color:0xfff6d0,fog:false,transparent:true,opacity:0}));moon.position.set(-50,60,-60);sky.add(moon);
+const FF=[];for(let i=0;i<45;i++){const m=new THREE.Mesh(new THREE.SphereGeometry(.09,6,5),new THREE.MeshBasicMaterial({color:0xfff27a}));m.visible=false;scene.add(m);FF.push({m,a:rnd()*9,b:rnd()*9,x:rnd()*24-12,z:rnd()*24-12})}
+const BD=[0,1,2].map(i=>{const g=G(0,0,0);g.w=[B(.7,.04,.25,0x333333,-.35,0,0,g),B(.7,.04,.25,0x333333,.35,0,0,g)];return g});
+const PT=new Float32Array(360);for(let i=0;i<360;i+=3){PT[i]=rnd()*40-20;PT[i+1]=rnd()*10;PT[i+2]=rnd()*40-20}
+const pg=new THREE.BufferGeometry();pg.setAttribute('position',new THREE.BufferAttribute(PT,3));const petals=new THREE.Points(pg,new THREE.PointsMaterial({color:0xffb3c8,size:.28}));scene.add(petals);
+const RP=new Float32Array(2100);for(let i=0;i<2100;i+=3){RP[i]=rnd()*40-20;RP[i+1]=rnd()*16;RP[i+2]=rnd()*40-20}
+const rg=new THREE.BufferGeometry();rg.setAttribute('position',new THREE.BufferAttribute(RP,3));const rain=new THREE.Points(rg,new THREE.PointsMaterial({color:0xaad4ff,size:.14}));rain.visible=false;scene.add(rain);
+const lampM=new THREE.MeshLambertMaterial({color:0xfff2b0,emissive:0});
+[[2.2,10],[13.5,10],[24.5,11],[34,9.6],[50,9.6],[64,9.6],[80,9.6],[96,9.6],[112,9.6],[128,9.6],[144,9.6],[160,9.6],[15.5,29.5],[8,34]].forEach(([x,z])=>{Cy(.07,.09,2.6,0x333333,x,1.3,z);Sp(.22,0,x,2.7,z).material=lampM});
+const hl=new THREE.PointLight(0xffd27a,0,12),kl=new THREE.PointLight(0xffd27a,0,12);hl.position.set(4,3,9);kl.position.set(14,3,9);scene.add(hl,kl);
+function atmo(dt,t,n,px,pz){const o=!IN;
+ sky.position.copy(camr.position);starM.opacity=Math.max(0,(n-.2)*3);moon.material.opacity=starM.opacity;
+ if(o){if(!RAIN&&Math.random()<dt/600){RAIN=1;rt=300;toast(S.season===3?'❄️ Іде сніг — 5 хвилин':'🌧 Дощ на 5 хвилин — рослини ростуть швидше!')}else if(RAIN){rt-=dt;if(rt<=0){RAIN=0;toast(S.season===3?'☀️ Сніг скінчився':'☀️ Дощ скінчився')}}}
+ hl.intensity=kl.intensity=n>.15?1.1:0;
+ FF.forEach((f,i)=>{f.m.visible=o&&n>.12&&!RAIN;f.m.position.set(px+f.x+Math.sin(t*.5+f.a)*2,.8+Math.sin(t*1.3+f.b)*.4,pz+f.z+Math.cos(t*.4+f.b)*2);f.m.scale.setScalar(.6+.4*Math.sin(t*4+i))});
+ BD.forEach((b,i)=>{b.visible=o&&n<.15;b.position.set(((t*3+i*30)%90)-10,12+i*2,2+i*8+Math.sin(t+i)*2);b.w[0].rotation.z=Math.sin(t*9+i)*.5;b.w[1].rotation.z=-Math.sin(t*9+i)*.5});
+ petals.visible=o&&!RAIN;petals.position.set(px,0,pz);for(let i=0;i<PT.length;i+=3){PT[i+1]-=dt*.8;PT[i]+=Math.sin(t+i)*dt*.6;if(PT[i+1]<0)PT[i+1]=10}pg.attributes.position.needsUpdate=true;
+ rain.visible=o&&!!RAIN;rain.position.set(px,0,pz);if(RAIN){for(let i=0;i<RP.length;i+=3){RP[i+1]-=dt*(S.season===3?6:28);if(RP[i+1]<0)RP[i+1]=16}rg.attributes.position.needsUpdate=true}
+ amb(n)}
+let AC=null,MUTE=false,ng=null,nt=0;const SC=[262,294,330,392,440,523];
+function audio(){if(AC){AC.resume&&AC.resume();return}try{AC=new(window.AudioContext||window.webkitAudioContext)();
+ const b=AC.createBuffer(1,AC.sampleRate*2,AC.sampleRate),d=b.getChannelData(0);for(let i=0;i<d.length;i++)d[i]=Math.random()*2-1;
+ const z=AC.createBufferSource();z.buffer=b;z.loop=true;const f=AC.createBiquadFilter();f.type='lowpass';f.frequency.value=1200;ng=AC.createGain();ng.gain.value=0;z.connect(f);f.connect(ng);ng.connect(AC.destination);z.start()}catch(e){AC=null}}
+function tn(f,d,ty,v){if(!AC||MUTE)return;const o=AC.createOscillator(),g=AC.createGain(),t=AC.currentTime;o.type=ty;o.frequency.value=f;g.gain.setValueAtTime(v,t);g.gain.exponentialRampToValueAtTime(.0001,t+d);o.connect(g);g.connect(AC.destination);o.start(t);o.stop(t+d)}
+function amb(n){if(!AC)return;ng.gain.value=(RAIN&&!MUTE&&!IN)?.12:0;const now=performance.now();if(now<nt)return;
+ if(Math.random()<.5){nt=now+1500;tn(SC[Math.random()*6|0]*(n>.3?.5:1),2.2,'sine',.05)}
+ else{nt=now+900;if(n<.15&&!RAIN){const f=2200+Math.random()*900;tn(f,.07,'sine',.03);setTimeout(()=>tn(f*1.2,.07,'sine',.03),110)}else if(n>.3)for(let i=0;i<3;i++)setTimeout(()=>tn(4300,.04,'square',.01),i*70)}}
+$('snd').onclick=()=>{MUTE=!MUTE;$('snd').textContent=MUTE?'🔇':'🔊'};
+const IS=[
+ {bg:'linear-gradient(#0b1030,#2b2d42)',a:'🌙🐱🌾',h:'CAT FARMING<br>SIMULATOR',t:'версія 2.7 «Горизонт» — історія однієї ферми'},
+ {bg:'linear-gradient(#0b1030,#3d405b)',a:'🏚️⭐🌳',t:'Давним-давно, у тихій долині за горами, стояла стара ферма. Її поля давно заросли, а в хаті було тихо.'},
+ {bg:'linear-gradient(#ff9a76,#ffd6a5)',a:'🌅🌾👴',t:'Її господар, дід Іван, усе життя вирощував пшеницю й овочі. А тепер вирішив, що настав час відпочити.'},
+ {bg:'linear-gradient(#6ec6ff,#bde7ff)',a:'🐱📦🪙',t:'Тепер ферма — твоя. У спадок: трохи монет, стара хата і рудий кіт Мурчик, який знає всі секрети долини.'},
+ {bg:'linear-gradient(#8fd06f,#4a9e4f)',a:'🥕🐔🐄🚜',t:'Садь і збирай урожай, торгуй у кіоску, розводь тварин, купуй трактор і комбайн та одягайся стильно.'},
+ {bg:'linear-gradient(#3a506b,#6fffe9)',a:'🏙️🚗🔫',t:'А далеко на сході, за лісом, лежить містечко Октава: пекарня, магазини, машини. Постачай їм свій урожай!'},
+ {bg:'linear-gradient(#ffd166,#ef476f)',a:'💳😅🏠',t:'Але обережно з кредитами: банк жартувати не любить! Готовий стати найкращим фермером долини?'}];
+let iI=0,iT=null,iF='';
+function introShow(){const s=IS[iI],el=$('intro');el.style.background=s.bg;
+ el.innerHTML=`<button class="skip" onclick="introEnd(event)">Пропустити ⏭</button><div class="ia">${s.a}</div>${s.h?'<div style="font-size:28px;font-weight:bold;margin-top:12px;text-shadow:3px 3px 0 #000;line-height:1.1">'+s.h+'</div>':''}<div class="it2" id="itx"></div><div class="dots">${IS.map((_,k)=>'<i class="'+(k===iI?'on':'')+'"></i>').join('')}</div><div class="tap">${iI===IS.length-1?'▶ тапни, щоб почати':'тапни, щоб продовжити'}</div>`;
+ iF=s.t;let n=0;clearInterval(iT);iT=setInterval(()=>{n+=2;$('itx').textContent=iF.slice(0,n);if(n>=iF.length)clearInterval(iT)},32)}
+function introNext(){const x=$('itx');if(x&&x.textContent.length<iF.length){clearInterval(iT);x.textContent=iF;return}if(iI<IS.length-1){iI++;introShow()}else introEnd()}
+function introEnd(e){if(e)e.stopPropagation();clearInterval(iT);$('intro').style.display='none';audio();if(NEWG){NEWG=0;toast('🎁 Стартовий бонус: 20 000 🪙!')}}
+window.introEnd=introEnd;
+$('intro').addEventListener('pointerdown',e=>{if(e.target.className==='skip')return;audio();introNext()});
+
+// seasons & rent
+const SN=[['🌸','Весна'],['☀️','Літо'],['🍂','Осінь'],['❄️','Зима']],SKY=[0x8fd3f4,0x6ec6ff,0xb8c4d0,0xcfdbe6],RENT=1500;
+const GC=[0x7fd37f,0x6dbf4a,0xb59a45,0xf0f5fa],FC=[[0x3fae4d,0x7bd66a],[0x2d9e3f,0x3cb44f],[0xc2571a,0xe6a23c],[0xdfe9f2,0xffffff]],MC=[[0x6bbf6f,0x5fb264],[0x5fb264,0x4fa356],[0xa88a4a,0x9a7c3e],[0xe8eef4,0xd5dee8]];
+const FM=[new THREE.MeshLambertMaterial({color:0x2d9e3f}),new THREE.MeshLambertMaterial({color:0x3cb44f})],FLW=[];
+{const c=document.createElement('canvas');c.width=c.height=128;const x=c.getContext('2d');x.fillStyle='#fff';x.fillRect(0,0,128,128);for(let i=0;i<900;i++){const v=200+Math.random()*55|0;x.fillStyle='rgb('+v+','+v+','+v+')';x.fillRect(Math.random()*128,Math.random()*128,2,3)}for(let i=0;i<140;i++){x.fillStyle='rgba(110,110,110,.35)';x.fillRect(Math.random()*128,Math.random()*128,1,4)}
+ const tx=new THREE.CanvasTexture(c);tx.wrapS=tx.wrapT=THREE.RepeatWrapping;tx.repeat.set(750,190);tx.magFilter=THREE.NearestFilter;gr.material=new THREE.MeshLambertMaterial({color:0x7fd37f,map:tx})}
+scene.traverse(o=>{if(!o.isMesh||o.parent!==scene)return;const g=o.geometry,c=o.material.color&&o.material.color.getHex();
+ if(g.type==='ConeGeometry'&&(c===0x2d9e3f||c===0x3cb44f))o.material=FM[c===0x2d9e3f?0:1];
+ else if(g.type==='SphereGeometry'&&g.parameters.radius===.13)FLW.push(o);
+ else if(g.type==='BoxGeometry'&&g.parameters.width===.05&&g.parameters.height===.3&&c===0x3d8b47)FLW.push(o)});
+function applySeason(){const q=S.season||0;gr.material.color.setHex(GC[q]);FM[0].color.setHex(FC[q][0]);FM[1].color.setHex(FC[q][1]);
+ M(0x6bbf6f).color.setHex(MC[q][0]);M(0x5fb264).color.setHex(MC[q][1]);M(0x4da3e0).color.setHex(q===3?0xcfe9f5:0x4da3e0);FLW.forEach(o=>o.visible=q<2);
+ petals.material.color.setHex([0xffb3c8,0xfff3a0,0xe67e22,0xffffff][q]);petals.material.size=[.28,.14,.3,.24][q];
+ rain.material.color.setHex(q===3?0xffffff:0xaad4ff);rain.material.size=q===3?.24:.14}
+function worldTick(dt){WMB.rotation.z+=dt*(RAIN?1.6:.7);wildTick(dt);townTick(dt);fieldTick();S.gt+=dt;S.sT+=dt;
+ if(S.sT>=1200){S.sT-=1200;S.season=(S.season+1)%4;applySeason();toast(SN[S.season][0]+' Настала '+['весна','літо','осінь','зима'][S.season]+'!');save()}
+ const due=Math.floor(S.gt/2700);
+ if(S.paid<due){S.paid++;if(S.coins>=RENT){S.coins-=RENT;toast('🏠 Оренду ферми сплачено: −1500 🪙')}else{S.debt+=RENT;toast('Не вистачило монет — оренду 1500 додано до боргу 💳')}ui();save()}
+ const rem=2700-S.gt%2700;if(rem<450&&S.warn!==S.paid){S.warn=S.paid;toast('⚠️ Завтра оренда ферми 1500 🪙!')}
+ const inf=SN[S.season][0]+' '+SN[S.season][1]+' · ще '+Math.ceil((1200-S.sT)/60)+'хв'+(S.gun?' · 🔫'+(S.ammo||0):'')+'<br>📅 День '+(Math.floor(S.gt/900)+1)+' · 🏠 оренда '+RENT+'🪙 через '+Math.ceil(rem/900)+' дн.';
+ if(worldTick.s!==inf){worldTick.s=inf;$('info').innerHTML=inf}}
+applySeason();
+
+// ===== release 2.0: big world, lakes, forage, windmill, vehicle controls, inventory, splash =====
+const VILL=[[494,92,36,16],[304,180,36,16],[954,180,36,16],[774,260,36,16],[304,260,36,16],[900,124,16,36],[1100,214,16,36],[1134,92,36,16],[440,100,16,14],[909,99,12,12]];
+const LK2=[[330,305,9],[800,140,9],[1000,300,10]];
+const ROADS=[{h:1,c:92,a:250,b:1330},{h:1,c:180,a:250,b:1330},{h:1,c:260,a:250,b:1330},{h:1,c:356,a:250,b:1330},{h:0,c:250,a:14.7,b:356},{h:0,c:420,a:14.7,b:356},{h:0,c:900,a:14.7,b:356},{h:0,c:1100,a:14.7,b:356},{h:0,c:1330,a:14.7,b:356},{h:0,c:560,a:346,b:356},{h:0,c:335,a:147,b:180,w:3},{h:0,c:700,a:233,b:260,w:3},{h:0,c:1000,a:151,b:180,w:3},{h:0,c:1200,a:311,b:356,w:3}];
+const roadHit=(x,z)=>ROADS.some(r=>r.h?(Math.abs(z-r.c)<5.4&&x>r.a-3&&x<r.b+3):(Math.abs(x-r.c)<5.4&&z>r.a-3&&z<r.b+3));
+const bad=(x,z)=>roadHit(x,z)||VILL.some(v=>Math.abs(x-v[0])<v[2]/2&&Math.abs(z-v[1])<v[3]/2)||LK2.some(l=>Math.hypot(x-l[0],z-l[1])<l[2]+3)||(x<36&&z<52)||(x>33&&x<58&&z>9&&z<37)||(x>62&&x<80&&z>5&&z<26)||Math.hypot(x-26.4,z-6.8)<6||Math.hypot(x-62,z-57)<9||Math.hypot(x-110,z-30)<12||Math.hypot(x-30,z-85)<11||(z>7&&z<18);
+for(let x=60;x<160;x+=14){const h=9+rnd()*7;Cn(h*.8,h,x%28?0x5fb264:0x6bbf6f,x,h/2,-8-(x%3)*2,scene,6)}
+[[110,30,10],[30,85,9]].forEach(([x,z,r])=>{Cy(r,r,.15,0x4da3e0,x,.08,z);Cy(r+.6,r+.6,.1,0x5a8f4a,x,.04,z)});
+{const N=200,tr=new THREE.InstancedMesh(new THREE.CylinderGeometry(.2,.28,1.4,6),M(0x7b4a2a),N),f1=new THREE.InstancedMesh(new THREE.ConeGeometry(1.1,1.8,7),FM[0],N),f2=new THREE.InstancedMesh(new THREE.ConeGeometry(.8,1.4,7),FM[1],N),d=new THREE.Object3D();let n=0;
+ for(let a=0;a<N*4&&n<N;a++){const x=2+rnd()*134,z=2+rnd()*95;if(bad(x,z))continue;const q=.7+rnd()*.9;
+  d.rotation.y=rnd()*6;d.scale.setScalar(q);d.position.set(x,.7*q,z);d.updateMatrix();tr.setMatrixAt(n,d.matrix);d.position.set(x,2.1*q,z);d.updateMatrix();f1.setMatrixAt(n,d.matrix);d.position.set(x,3.1*q,z);d.updateMatrix();f2.setMatrixAt(n,d.matrix);n++}
+ tr.count=f1.count=f2.count=n;f1.castShadow=f2.castShadow=true;scene.add(tr,f1,f2)}
+const LAKES=[{x:620,y:570,r:70,sx:620,sy:655,bx:62,bz:61},{x:1100,y:300,r:100,sx:1100,sy:415,bx:110,bz:36},{x:300,y:850,r:90,sx:300,sy:955,bx:30,bz:90.5}];let FT=V(26.4,.3,7.8);
+const FI=[['mush','🍄',0xc0392b],['berry','🫐',0x3b4cc0],['rock','🪨',0x888888]],FG=[];
+for(let i=0;i<60;i++){let x,z;do{x=4+rnd()*130;z=4+rnd()*92}while(bad(x,z));const k=i%3,m=Sp(.3,FI[k][2],x,.28,z);m.scale.y=.8;FG.push({m,k,x:x*10,y:z*10,t:0})}
+const wmg=G(58.5,0,24);Cy(1.2,2,6,0xe6d8bd,0,3,0,wmg);Cn(1.7,1.9,0xb23a48,0,6.9,0,wmg);B(.9,1.4,.1,0x5a3825,0,.7,1.75,wmg);const WMB=G(0,5.3,1.7,wmg);
+for(let k=0;k<4;k++){const a=G(0,0,0,WMB);a.rotation.z=k*Math.PI/2;B(.3,3.2,.08,0xf5f5f5,0,1.7,0,a)}
+[{n:'🎣 Рибалка Петро',x:610,y:655,buys:['fish'],c:[0x3a86ff,0x555555,0xe9c46a],wp:[[570,655],[660,655],[620,645]]},{n:'🍄 Грибник Олекса',x:900,y:600,buys:['mush','berry','rock'],c:[0x8b5e3c,0x2b3a67,0x2a9d3f],wp:[[850,560],[950,620],[900,680]]}].forEach(n=>{n.lines=['Привіт!'];n.g=human(...n.c);scene.add(n.g);n.w=1;n.tx=n.x;n.ty=n.y;n.f=0;n.cd=0;NPCS.push(n)});
+// vehicle controls: steering + gas/brake
+const KS={l:0,r:0,g:0,b:0};let DH=0,DV=0;
+['bl','br','bg','bb'].forEach(id=>{const e=$(id),k=id[1];e.addEventListener('pointerdown',ev=>{ev.preventDefault();e.setPointerCapture(ev.pointerId);KS[k]=1;e.classList.add('on')});const up=()=>{KS[k]=0;e.classList.remove('on')};e.addEventListener('pointerup',up);e.addEventListener('pointercancel',up);e.addEventListener('lostpointercapture',up)});
+function drive(dt){const sp=$('spd');if(!P.veh||IN){DV=0;sp.style.display='none';return}
+ const mx=(P.veh==='car'?230:115)+35*(S.vspd||0),th=(KS.g||keys.arrowup||keys.w?1:0)-(KS.b||keys.arrowdown||keys.s?1:0),st=(KS.r||keys.arrowright||keys.d?1:0)-(KS.l||keys.arrowleft||keys.a?1:0);
+ if(th||st){P.tx=null;P.act=null}
+ if(th||st||(P.tx==null&&Math.abs(DV)>3)){
+  if(th>0)DV+=dt*140;else if(th<0)DV-=dt*(DV>0?320:90);else DV-=Math.sign(DV)*Math.min(Math.abs(DV),dt*80);
+  DV=Math.max(-mx*.4,Math.min(mx,DV));DH-=st*dt*1.7*Math.min(1,Math.abs(DV)/50)*Math.sign(DV||1);
+  P.x=Math.max(8,Math.min(WW-8,P.x+Math.sin(DH)*DV*dt));P.y=Math.max(84,Math.min(WH-4,P.y+Math.cos(DH)*DV*dt))}
+ else if(P.tx!=null){DV=0;DH=Math.atan2(P.tx-P.x,P.ty-P.y)}
+ sp.style.display='block';sp.textContent='⚡ '+Math.round(Math.abs(DV)*.4)+' км/год'}
+$('mm').addEventListener('pointerdown',e=>{e.stopPropagation();const r=$('mm').getBoundingClientRect();go(OX+(e.clientX-r.left)/r.width*2600,OY+(e.clientY-r.top)/r.height*1000);toast('🗺 Іду туди')});
+// inventory
+const NM={egg:'Яйця',wool:'Вовна',milk:'Молоко',truffle:'Трюфелі',fish:'Риба',wheat:'Пшениця',mush:'Гриби',berry:'Ягоди',rock:'Камінь'};CROPS.forEach(c=>NM[c.id]=c.n);
+const GRP=[['🌱 Урожай',['carrot','tomato','straw','pump','apple','wheat']],['🥚 Від тварин',['egg','wool','milk','truffle']],['🎣 Риба й збирання',['fish','mush','berry','rock','meat']],['🍳 Приготоване',['bread','roast','pie','bakedm','omelet']]];
+const TABS=t=>`<div class="row2">${[['items','🎒 Речі'],['cl','👕 Одяг'],['veh','🚜 Техніка'],['st','📊 Стат.'],['shop','🛍 Шафа']].map(([k,n])=>`<button class="tb ${t===k?'on':''}" onclick="openBag('${k}')">${n}</button>`).join('')}</div>`;
+function openBag(t){t=t||'items';if(t==='cl'||t==='shop')return openBagOld(t);let h='';
+ if(t==='items'){let tot=0,cnt=0;ITEMS.forEach(c=>{const q=S.inv[c.id]||0;tot+=q*Math.round(c.p*mult());cnt+=q});
+  h=`<div class="sum">Предметів: <b>${cnt}</b> · вартість ≈ <b>${tot} 🪙</b></div>`+GRP.map(([n,ids])=>`<h4>${n}</h4><div class="gr">${ids.map(id=>{const c=ITEMS.find(i=>i.id===id),q=S.inv[id]||0;return `<div class="cd ${q?'':'em'}"><b>${c.e}</b><span class="bd">${q}</span><small>${NM[id]}</small><small>${Math.round(c.p*mult())}🪙</small></div>`}).join('')}</div>`).join('')+'<div class="hint">Продавай у кіоску 🏪. Марія, Петро й Олекса платять більше.</div>'}
+ else if(t==='veh'){const mx=115+35*(S.vspd||0);h=`<div class="gr">${Object.entries(VT).map(([k,v],_i,_a,e=v.n.split(' ')[0],n=v.n.slice(v.n.indexOf(' ')+1),d=v.cl==='t'?'садить':v.cl==='h'?'збирає':'їздить')=>`<div class="cd ${S.veh[k]?'':'em'}"><b>${e}</b><small>${n}</small><small>${S.veh[k]?'✅ є, '+d:'🔒 у техномаркеті'}</small></div>`).join('')}<div class="cd"><b>⚡</b><small>Двигун Lv${S.vspd||0}</small><small>до ${Math.round(mx*.4)} км/год</small></div></div><div class="hint">Техномаркет — праворуч від дому по дорозі (мінікарта допоможе). Кермо ◀ ▶, газ ⬆, гальмо ⬇.</div>`}
+ else h=[['🪙 Монети',S.coins],['💳 Борг',S.debt||0],['📅 День',Math.floor(S.gt/900)+1],['🍂 Сезон',SN[S.season][0]+' '+SN[S.season][1]],['🏠 Дім / 🏪 Кіоск','Lv'+S.house+' / Lv'+S.kiosk],['🌾 Грядок',S.plots],['🐾 Тварин',S.an.length],['🚜 Техніка',Object.keys(VT).filter(k=>k!=='car'&&S.veh[k]).length+' з '+(Object.keys(VT).length-1)],['👕 Одягу',S.cl.own.length+' з '+CL.length]].map(([a,b])=>`<div class="stl"><span>${a}</span><b>${b}</b></div>`).join('');
+ showCard(`<h2>🎒 Інвентар<button class="x" onclick="closeCard()">X</button></h2>${TABS(t)}${h}`)}
+window.openBag=openBag;
+// splash
+function endSplash(){const e=$('splash');if(!e||e.dataset.d)return;e.dataset.d=1;e.style.opacity=0;setTimeout(()=>{e.remove();introShow()},800)}
+function endProd(){const p=$('prod');if(!p||p.dataset.d)return;p.dataset.d=1;p.style.opacity=0;$('splash').classList.add('go');setTimeout(()=>p.remove(),900);setTimeout(endSplash,3900)}
+setTimeout(endProd,4200);$('prod').addEventListener('pointerdown',()=>{audio();endProd()});$('splash').addEventListener('pointerdown',()=>{audio();endSplash()});
+
+// ===== 2.0 «Октава»: town, shops, bakery, hunting, far fields, car, first-person =====
+const CT=(w,h,fn,rx,ry)=>{const c=document.createElement('canvas');c.width=w;c.height=h;const x=c.getContext('2d');x.fillStyle='#fff';x.fillRect(0,0,w,h);fn(x);const t=new THREE.CanvasTexture(c);t.wrapS=t.wrapT=THREE.RepeatWrapping;t.repeat.set(rx,ry);t.magFilter=THREE.NearestFilter;return t};
+const TWOOD=CT(64,64,x=>{for(let i=0;i<8;i++){x.fillStyle='rgba(0,0,0,.16)';x.fillRect(0,i*8,64,1);x.fillStyle='rgba(0,0,0,.07)';x.fillRect(Math.random()*54,i*8+3,10,2)}},2,2);
+const TROOF=CT(64,64,x=>{for(let r=0;r<8;r++)for(let c=0;c<8;c++){x.fillStyle='rgba(0,0,0,'+(.08+Math.random()*.14)+')';x.fillRect(c*8+(r%2)*4,r*8,7,1);x.fillRect(c*8+(r%2)*4,r*8,1,8)}},3,2);
+const TBRICK=CT(64,64,x=>{for(let r=0;r<8;r++){x.fillStyle='rgba(0,0,0,.25)';x.fillRect(0,r*8,64,1);for(let c=0;c<4;c++)x.fillRect(c*16+(r%2)*8,r*8,1,8)}},2,2);
+const TM=(c,t)=>new THREE.MeshLambertMaterial({color:c,map:t}),HMC={},HM=c=>HMC[c]||(HMC[c]=TM(c,TWOOD));
+rf.material=TM(0xb23a48,TROOF);cr.material=TM(0x8f2d3a,TROOF);br.material=TM(0x7a0c14,TROOF);
+if(S.veh.car===undefined)S.veh.car=1;
+let ROOM='house',EX={x:40,y:92};const RM={house:ig},RHIT={},RLAB={},BLDS=[];
+
+const FARMS=[{x:800,z:29,n:'«Східна»',price:40000,id:'wheat',e:'🌾',cap:200,rate:5},{x:680,z:300,n:'«Південна»',price:90000,id:'milk',e:'🥛',cap:100,rate:10},{x:560,z:340,n:'«Далека»',price:160000,id:'truffle',e:'🍄',cap:60,rate:15},{x:335,z:136,n:'«Північна»',price:150000,id:'wool',e:'🧶',cap:150,rate:8},{x:700,z:222,n:'«Лісова»',price:250000,id:'milk',e:'🥛',cap:150,rate:6},{x:1000,z:140,n:'«Озерна»',price:400000,id:'truffle',e:'🍄',cap:100,rate:10},{x:1200,z:300,n:'«Степова»',price:700000,id:'bread',e:'🍞',cap:100,rate:12}];
+const bad2=(x,z)=>bad(x,z)||(x>156&&x<234&&z<50)||(x>673&&x<687&&z>9)||(x>553&&x<567&&z>9)||(x>1197&&x<1288&&z<50)||FARMS.some(q=>Math.hypot(x-q.x,z-q.z)<17)||(x>222&&x<246&&((z>12&&z<36)||(z>45&&z<69)||z>78));
+function forest(N,x0,x1,z0,z1){const tr=new THREE.InstancedMesh(new THREE.CylinderGeometry(.2,.28,1.4,6),M(0x7b4a2a),N),f1=new THREE.InstancedMesh(new THREE.ConeGeometry(1.1,1.8,7),FM[0],N),f2=new THREE.InstancedMesh(new THREE.ConeGeometry(.8,1.4,7),FM[1],N),d=new THREE.Object3D();let n=0;
+ for(let a=0;a<N*5&&n<N;a++){const x=x0+rnd()*(x1-x0),z=z0+rnd()*(z1-z0);if(bad2(x,z))continue;const q=.8+rnd()*1.1;d.rotation.y=rnd()*6;d.scale.setScalar(q);
+  d.position.set(x,.7*q,z);d.updateMatrix();tr.setMatrixAt(n,d.matrix);d.position.set(x,2.1*q,z);d.updateMatrix();f1.setMatrixAt(n,d.matrix);d.position.set(x,3.1*q,z);d.updateMatrix();f2.setMatrixAt(n,d.matrix);n++}
+ tr.count=f1.count=f2.count=n;f1.castShadow=f2.castShadow=true;scene.add(tr,f1,f2)}
+forest(300,40,136,38,97);forest(190,140,262,40,98);forest(70,140,262,2,12);forest(260,262,880,2,365);forest(220,880,1400,2,360);forest(380,430,890,96,256);forest(300,950,1400,100,350);forest(250,262,420,100,350);forest(320,1110,1325,100,350);forest(260,560,900,266,352);forest(200,262,430,2,92);
+for(let x=160;x<290;x+=14){const h=9+rnd()*7;Cn(h*.8,h,x%28?0x5fb264:0x6bbf6f,x,h/2,-8-(x%3)*2,scene,6)}
+// car
+function mkCar(c){const g=G(0,0,0);B(1.7,.6,3.4,c,0,.65,0,g);B(1.5,.55,1.8,0x9fd8f0,0,1.2,-.2,g);B(1.52,.1,1.5,c,0,1.52,-.2,g);
+ [.55,-.55].forEach(x=>{B(.3,.18,.1,0xfff2b0,x,.7,1.72,g);B(.3,.18,.1,0xd62828,x,.7,-1.72,g)});B(1.5,.14,.1,0x222222,0,.4,1.74,g);
+ [[.85,1.1],[-.85,1.1],[.85,-1.1],[-.85,-1.1]].forEach(([x,z])=>{wh(.42,.3,x,.42,z,g);Cy(.2,.2,.32,0xcccccc,x,.42,z,g).rotation.z=Math.PI/2});return g}
+VEH.car={g:mkCar(0xe63946),x:200,y:118};
+// rooms
+function mkRoom(fl,wl){const r=G(100,0,100);B(8,.2,8,fl,4,-.1,4,r);[[8,3.5,.3,4,1.75,-.15],[.3,3.5,8,-.15,1.75,4],[.3,3.5,8,8.15,1.75,4],[3,.7,.3,1.5,.35,8.15],[3,.7,.3,6.5,.35,8.15]].forEach(([w,h,d,x,y,z])=>B(w,h,d,wl,x,y,z,r));
+ B(2,.04,.9,0x7a4b3a,4,.05,7.6,r);const pl=new THREE.PointLight(0xffd9a0,.8,16);pl.position.set(4,3.2,4);r.add(pl);B(1.7,1.3,.1,0,4,2.2,.1,r).material=winM;
+ B(4,1.1,1,0x8b5e3c,4,.55,1.5,r);B(4.2,.12,1.2,0xe9d8a6,4,1.15,1.5,r);const c=human(0xffffff,0x333333,0xffffff);c.position.set(4,0,.6);r.add(c);r.visible=false;return r}
+const shelf=(r,x,z,cs)=>{B(.6,2.2,2.2,0x8b5e3c,x,1.1,z,r);cs.forEach((c,i)=>B(.45,.3,.45,c,x+(x>4?-.1:.1),.5+i*.6,z-.6+(i%2)*1.2,r))};
+const CTR={x0:1020,x1:1060,y0:1004,y1:1026,gx:1040,gy:1036,k:'rcount'};
+RM.bakery=mkRoom(0xe8d5b5,0xf6e3c4);shelf(RM.bakery,.7,4.5,[0xd9a066,0xc98a4b,0xe9c46a]);B(2,2,1.4,0x7a3b2e,6.9,1,1.3,RM.bakery);B(1.2,.9,.1,0x222222,6.9,1,2.02,RM.bakery);B(1,.6,.1,0xff7a18,6.9,.9,2.05,RM.bakery);
+RHIT.bakery=[CTR,{x0:1056,x1:1079,y0:1004,y1:1032,gx:1068,gy:1042,k:'roven'}];RLAB.bakery=[['📦 Доставки',3,3,1.5],['🔥 Піч',6.9,2.7,1.3],['🥖 Пекарня',4,3.8,.6]];
+RM.grocery=mkRoom(0xcfe8c0,0xeaf5e0);shelf(RM.grocery,.7,4.5,[0xe63946,0xf77f00,0x2a9d3f]);shelf(RM.grocery,7.3,4.5,[0xffd166,0xff8fab,0x3a86ff]);RHIT.grocery=[CTR];RLAB.grocery=[['📦 Доставки',4,2.6,1.5],['🛒 Продукти',4,3.8,.6]];
+RM.market=mkRoom(0xc8d8f0,0xe8eefa);shelf(RM.market,.7,4.5,[0x9d4edd,0xe9c46a,0x06d6a0]);shelf(RM.market,7.3,4.5,[0xe63946,0x3a86ff,0xffffff]);RHIT.market=[CTR];RLAB.market=[['📦 Доставки',4,2.6,1.5],['🏬 Універмаг',4,3.8,.6]];
+RM.gun=mkRoom(0x8b7355,0xb59b74);[1.5,3,4.5,6].forEach(x=>B(.12,.12,1.5,0x222222,x,2.4,.05,RM.gun).rotation.z=Math.PI/2.5);shelf(RM.gun,.7,4.5,[0x556b2f,0x8b4513,0x333333]);RHIT.gun=[CTR];RLAB.gun=[['🔫 Зброя й доставки',4,2.6,1.5],['🔫 Мисливський',4,3.8,.6]];
+function enterRoom(r,ex,ey){dismount();IN=true;ROOM=r;EX={x:ex,y:ey};for(const k in RM)RM[k].visible=k===r;P.fish=0;P.x=1040;P.y=1064;P.tx=null;P.act=null;dog.x=1030;dog.y=1060;cat.x=1020;cat.y=1066;camr.position.set(104,10.5,112);camLook.set(104,0,104.5);toast(r==='house'?'🏠 Вдома: ліжко — спати, стіл — прокачка, піч — готувати':'🏪 Підійди до прилавка — ти постачальник!')}
+function leave(){IN=false;for(const k in RM)RM[k].visible=false;P.x=EX.x;P.y=EX.y;P.tx=null;P.act=null;dog.x=EX.x+10;dog.y=EX.y+4;cat.x=EX.x-10;cat.y=EX.y+8;camr.position.set(EX.x/10,13*ZM,EX.y/10+11*ZM);camLook.set(EX.x/10,0,EX.y/10)}
+// town Octava
+function bld(room,cx,cz,w,d,h,wc,rc,tex,nm){const g=G(cx,0,cz);B(w,h,d,0,0,h/2,0,g).material=TM(wc,tex||TBRICK);const r=Cn(w*.78,2.2,0,0,h+1.1,0,g,4);r.rotation.y=Math.PI/4;r.scale.z=d/w*.95;r.material=TM(rc,TROOF);
+ B(1.3,2.1,.1,0x5a3825,0,1.05,d/2+.02,g);[-1,1].forEach(x=>B(1.3,1.1,.1,0,x*(w/2-1.5),1.9,d/2+.02,g).material=winM);B(w+.2,.2,1.2,0xe63946,0,2.7,d/2+.5,g).rotation.x=.25;
+ BLDS.push({room,nm,cx,cz,x0:(cx-w/2)*10,x1:(cx+w/2)*10,y0:(cz-d/2)*10,y1:(cz+d/2)*10,gx:cx*10,gy:(cz+d/2)*10+22,ex:cx*10,ey:(cz+d/2)*10+22})}
+bld('bakery',178,6.5,7,5,3.4,0xc4673b,0x7a3b2e,TBRICK,'🥖 Пекарня');bld('grocery',188.5,6.5,7,5,3.4,0x6aa84f,0x2d6a1f,TWOOD,'🛒 Продукти');bld('market',199,6.5,7,5,3.4,0x3a86ff,0x1d3f7a,TBRICK,'🏬 Універмаг');bld('gun',209.5,6.5,7,5,3.4,0x8b6b4a,0x3b2a1a,TWOOD,'🔫 Мисливський');
+B(45,.05,9,0x8a8a8a,194,.03,13.5);B(45,.1,1.4,0xbbbbbb,194,.05,10.2);
+Cy(2.2,2.4,.6,0x999999,194,.3,19.5);Cy(.3,.3,2,0x999999,194,1.2,19.5);Cy(1.8,1.8,.5,0x4da3e0,194,.52,19.5);
+for(let x=175;x<216;x+=8){Cy(.07,.09,2.6,0x333333,x,1.3,9.7);Sp(.22,0,x,2.7,9.7).material=lampM}
+[[176,0xe63946],[184,0x3a86ff],[192,0xffd166],[200,0x2a9d3f],[208,0x9d4edd]].forEach(([x,c])=>{const g=mkCar(c);g.position.set(x,0,17.5);g.rotation.y=Math.PI/2})
+const TC=[{g:mkCar(0xffd166),x:90,z:13.3,d:1},{g:mkCar(0x3a86ff),x:200,z:11.8,d:-1}];
+function townTick(dt){TC.forEach(c=>{c.x+=c.d*9*dt;if(c.x>205)c.d=-1;if(c.x<72)c.d=1;c.g.position.set(c.x,0,c.z);c.g.rotation.y=c.d>0?Math.PI/2:-Math.PI/2})}
+const TWX=[[1760,125],[1850,150],[1950,140],[2050,150],[2100,120],[1900,200],[1980,210]];
+[{n:'👨‍💼 Мер Богдан',x:1900,y:150,t:'g',c:[0x333344,0x222233,0x111111],lines:['Ласкаво просимо до Октави!','У нас найкраща пекарня в долині.']},
+ {n:'👵 Галя',x:1800,y:140,buys:['bread','pie','omelet','bakedm'],c:[0xb5838d,0x6d597a,0xdddddd],lines:['Привіт!']},
+ {n:'🧑‍🔧 Сашко-механік',x:2000,y:200,buys:['rock','meat'],c:[0x2a6fb5,0x333333,0xffd166],lines:['Привіт!']},
+ {n:'👮 Поліцейський',x:1950,y:130,t:'g',c:[0x1d3f7a,0x1d3f7a,0x1d3f7a],lines:['Не гоніть по місту!','Тут безпечно, фермере.']},
+ {n:'🧒 Данилко',x:2060,y:140,t:'g',c:[0xffd166,0x3a86ff,0xe63946],lines:['Круто, у вас машина!','Я теж буду фермером!']},
+ {n:'👩‍🍳 Пекарка Оксана',x:1780,y:150,buys:['bread','roast','pie','wheat'],c:[0xffffff,0x333333,0xffffff],lines:['Привіт!']}].forEach(n=>{n.wp=TWX;n.g=human(...n.c);scene.add(n.g);n.w=1;n.tx=n.x;n.ty=n.y;n.f=0;n.cd=0;NPCS.push(n)});
+// supply
+Object.assign(NM,{meat:"М'ясо",bread:'Хліб',roast:'Печеня',pie:'Пиріг',bakedm:'Гриби запечені',omelet:'Омлет'});
+const WANT={bakery:['wheat','egg','milk','berry','bread'],grocery:['carrot','tomato','straw','pump','apple','milk','egg'],market:['fish','wool','truffle','mush','berry','meat'],gun:['meat','roast','wool','rock']};
+const RN={bakery:'🥖 Пекарня «Золотий колос»',grocery:'🛒 Магазин «Свіжий»',market:'🏬 Універмаг Октави',gun:'🔫 Мисливський магазин'};
+function orders(r){const d=Math.floor(S.gt/900);if(!S.ord||S.ordD!==d){S.ord={};S.ordD=d}if(!S.ord[r])S.ord[r]=WANT[r].slice().sort(()=>Math.random()-.5).slice(0,3).map(id=>({id,q:3+Math.random()*9|0}));return S.ord[r]}
+function openSupply(r){const O=orders(r);
+ showCard(`<h2>${RN[r]}<button class="x" onclick="closeCard()">X</button></h2><h4>📦 Замовлення — ти постачальник (ціна +50%)</h4>`+(O.length?O.map((o,i)=>{const c=ITEMS.find(x=>x.id===o.id),pr=Math.round(c.p*mult()*1.5);return `<button class="up" ${(S.inv[o.id]||0)<o.q?'disabled':''} onclick="deliver('${r}',${i})">${c.e} ${NM[o.id]} ×${o.q} — ${pr}🪙/шт = ${pr*o.q}🪙<br>є: ${S.inv[o.id]||0}</button>`}).join(''):'<i>Усі замовлення виконано, нові — завтра</i>')+(r==='gun'?`<button class="up" ${S.gun||S.coins<600?'disabled':''} onclick="buyGun()">🔫 Рушниця — ${S.gun?'є ✅':'600 🪙'}</button><button class="up" ${S.coins<50?'disabled':''} onclick="buyAmmo()">🔸 Патрони ×10 — 50 🪙 (є: ${S.ammo||0})</button>`:'')+'<h4 style="font-size:11px">Нові замовлення щодня.</h4>')}
+window.deliver=(r,i)=>{const o=orders(r)[i],c=ITEMS.find(x=>x.id===o.id),pr=Math.round(c.p*mult()*1.5)*o.q;if((S.inv[o.id]||0)<o.q)return;S.inv[o.id]-=o.q;S.coins+=pr;S.ord[r].splice(i,1);ui();save();openSupply(r);toast('+'+pr+' 🪙 за доставку')};
+window.buyGun=()=>{S.coins-=600;S.gun=1;S.ammo=(S.ammo||0)+5;ui();save();openSupply('gun')};window.buyAmmo=()=>{S.coins-=50;S.ammo=(S.ammo||0)+10;ui();save();openSupply('gun')};
+// oven
+const REC=[{id:'bread',e:'🍞',n:'Хліб',in:{wheat:3},out:2},{id:'roast',e:'🍖',n:'Печеня',in:{meat:1},out:1},{id:'pie',e:'🥧',n:'Ягідний пиріг',in:{berry:3,wheat:1},out:1},{id:'bakedm',e:'🍲',n:'Запечені гриби',in:{mush:2},out:1},{id:'omelet',e:'🍳',n:'Омлет',in:{egg:2},out:1}];
+function openOven(){const b=S.bake,now=Date.now();let h;
+ if(b&&b.end>now)h=`<div class="sum">🔥 Печеться ${REC.find(r=>r.id===b.r).e}… ${Math.ceil((b.end-now)/1000)} с</div><button class="up" onclick="openOven()">Оновити</button>`;
+ else if(b){const r=REC.find(x=>x.id===b.r);h=`<div class="sum">✅ Готово!</div><button class="big" onclick="takeBake()">Забрати ${r.e} ×${r.out}</button>`}
+ else h=REC.map(r=>{const ok=Object.entries(r.in).every(([k,v])=>(S.inv[k]||0)>=v);return `<button class="up" ${ok?'':'disabled'} onclick="bake('${r.id}')">${r.e} ${r.n} ×${r.out} (треба: ${Object.entries(r.in).map(([k,v])=>ITEMS.find(i=>i.id===k).e+'×'+v).join(' ')}) · ${ITEMS.find(i=>i.id===r.id).p}🪙/шт</button>`}).join('');
+ showCard(`<h2>🔥 Піч<button class="x" onclick="closeCard()">X</button></h2>${h}<h4 style="font-size:11px">Приготовлене коштує дорожче. Печеться 20 с.</h4>`)}
+window.bake=id=>{const r=REC.find(x=>x.id===id);Object.entries(r.in).forEach(([k,v])=>S.inv[k]-=v);S.bake={r:id,end:Date.now()+20000};ui();save();openOven()};
+window.takeBake=()=>{const r=REC.find(x=>x.id===S.bake.r);S.inv[r.id]=(S.inv[r.id]||0)+r.out;S.bake=null;ui();save();openOven()};
+// far fields
+const FLD=[{x:2250,y:150},{x:2250,y:480},{x:2250,y:810}],FSG=[],FM2=FLD.map(f=>{const ps=[];for(let i=0;i<16;i++){const q=G((f.x+(i%4)*46+21)*.1,0,(f.y+(i>>2)*44+19)*.1);B(4.2,.15,4,0x7b5a2a,0,.07,0,q);ps.push(B(3.8,1,3.6,0xe0b83a,0,.5,0,q))}FSG.push([B(.15,2.6,.15,0x5a3825,f.x*.1-1,1.3,f.y*.1-1),B(3,1,.1,0xd62828,f.x*.1-1,2.8,f.y*.1-1)]);return ps});
+function fieldTick(){const n=Date.now();FLD.forEach((f,fi)=>{const own=S.fx[fi];FSG[fi].forEach(m=>m.visible=!own);FM2[fi].forEach((m,i)=>{m.visible=!!own;if(own){const pr=Math.min(1,(n-S.fw[fi][i])/1000*speed()/30);m.scale.y=.15+.85*pr;m.position.y=.15+.5*m.scale.y;m.material=M(pr<1?0x8fbf4a:0xe0b83a)}})});
+ if(S.bake&&!S.bake.n&&n>=S.bake.end){S.bake.n=1;toast('🔥 Їжа в печі готова!')}}
+function openFieldBuy(i){const own=S.fx[i];showCard(`<h2>🌾 Далеке поле №${i+1}<button class="x" onclick="closeCard()">X</button></h2>`+(own?'<div class="sum">Це твоє поле ✅ Збирай комбайном: 16 ділянок пшениці.</div>':`<div class="sum">Поле продається: 100 000 🪙<br>(16 ділянок пшениці)</div><button class="big" ${S.coins<100000?'disabled':''} onclick="buyField(${i})">КУПИТИ ЗА 100 000 🪙</button><div class="hint">У тебе: ${S.coins} 🪙</div>`))}
+window.buyField=i=>{if(S.coins<100000)return;S.coins-=100000;S.fx[i]=1;S.fw[i]=Array(16).fill(0);ui();save();openFieldBuy(i);toast('🎉 Ти купив поле!')};
+// hunting
+function mkW(t){const g=G(0,0,0);
+ if(t==='deer'){B(.8,.7,1.5,0xa0693c,0,1.1,0,g);B(.35,.8,.35,0xa0693c,0,1.7,.7,g);B(.4,.4,.5,0xa0693c,0,2.1,.95,g);[.15,-.15].forEach(x=>B(.06,.5,.06,0xe9dcc4,x,2.5,.9,g));legs4(g,0x7a4b2a,.9,.25,.5)}
+ else if(t==='boar'){B(1,.8,1.5,0x4a3b32,0,.7,0,g);B(.6,.6,.6,0x4a3b32,0,.8,.95,g);B(.3,.25,.2,0x2b221d,0,.7,1.3,g);B(.06,.06,.3,0xffffff,.2,.6,1.25,g);legs4(g,0x2b221d,.4,.3,.5)}
+ else{B(.45,.4,.7,0xe0d6c8,0,.4,0,g);B(.3,.3,.3,0xe0d6c8,0,.6,.4,g);[.08,-.08].forEach(x=>B(.08,.4,.08,0xe0d6c8,x,.95,.4,g));legs4(g,0xcfc4b4,.2,.15,.2)}return g}
+const WILD=[];for(let i=0;i<20;i++){let x,z;do{x=42+rnd()*92;z=40+rnd()*55}while(bad2(x,z));const t=['deer','boar','rabbit'][i%3],m=mkW(t);WILD.push({t,m,x:x*10,y:z*10,tx:x*10,ty:z*10,w:0,alive:true,rt:0})}
+const trl=new THREE.Line(new THREE.BufferGeometry().setFromPoints([V(0,0,0),V(1,1,1)]),new THREE.LineBasicMaterial({color:0xffe08a}));trl.visible=false;scene.add(trl);let lastShot=0;
+function shoot(w){if(!S.gun)return toast('Потрібна рушниця — купи в Мисливському магазині в Октаві 🔫');if(!(S.ammo>0))return toast('Немає патронів!');
+ const d=Math.hypot(P.x-w.x,P.y-w.y);if(d>260){const k=150/d;return go(w.x+(P.x-w.x)*k,w.y+(P.y-w.y)*k)}
+ if(Date.now()-lastShot<500)return;lastShot=Date.now();S.ammo--;trl.geometry.setFromPoints([V(P.x*.1,1.4,P.y*.1),V(w.x*.1,.9,w.y*.1)]);trl.visible=true;setTimeout(()=>trl.visible=false,100);tn(110,.14,'sawtooth',.1);
+ if(Math.random()<.8){w.alive=false;w.m.visible=false;w.rt=180;const q=w.t==='rabbit'?1:w.t==='boar'?3:2;S.inv.meat=(S.inv.meat||0)+q;say('+'+q+' 🥩',w.x,w.y-20)}else toast('Промах!');ui();save()}
+function wildTick(dt){WILD.forEach(w=>{if(!w.alive){w.rt-=dt;if(w.rt<=0){w.alive=true;w.m.visible=true}return}
+ const fl=Math.hypot(P.x-w.x,P.y-w.y)<120;let sp=fl?(w.t==='rabbit'?70:55):(w.t==='rabbit'?22:14);
+ if(fl){const a=Math.atan2(w.x-P.x,w.y-P.y);w.tx=w.x+Math.sin(a)*60;w.ty=w.y+Math.cos(a)*60}
+ else if(w.w>0){w.w-=dt;sp=0}else if(Math.hypot(w.tx-w.x,w.ty-w.y)<4){w.w=1+Math.random()*4;let nx,nz;do{nx=w.x+(Math.random()-.5)*200;nz=w.y+(Math.random()-.5)*200}while(bad2(nx/10,nz/10)||nx<420||nx>1350||nz<400||nz>950);w.tx=nx;w.ty=nz}
+ const d=Math.hypot(w.tx-w.x,w.ty-w.y);if(sp&&d>1){w.x+=(w.tx-w.x)/d*sp*dt;w.y+=(w.ty-w.y)/d*sp*dt}
+ w.m.position.set(w.x*.1,0,w.y*.1);face(w.m,w.x*.1,w.y*.1,dt)})}
+function townLabs(){BLDS.forEach(b=>lab(b.nm,V(b.cx,5.4,b.cz)));lab('🏙 ОКТАВА',V(170,3.4,12.5));FLD.forEach((f,i)=>lab(S.fx[i]?'🌾 Моє поле':'🌾 ПРОДАЄТЬСЯ 100 000 🪙',V(f.x*.1-1,3.6,f.y*.1-1)))}
+
+// ===== road, town houses, fence collision =====
+function road(x0,x1,z,w){const L=x1-x0,cx=(x0+x1)/2;B(L,.06,w,0x4a4a50,cx,.03,z);B(L,.07,.22,0xd8d8d8,cx,.04,z-w/2+.11);B(L,.07,.22,0xd8d8d8,cx,.04,z+w/2-.11);for(let x=x0+1;x<x1-1;x+=3)B(1.4,.075,.14,0xffe066,x,.05,z)}
+function vroad(x,z0,z1,w){const L=z1-z0,cz=(z0+z1)/2;B(w,.06,L,0x4a4a50,x,.03,cz);B(.22,.07,L,0xd8d8d8,x-w/2+.11,.04,cz);B(.22,.07,L,0xd8d8d8,x+w/2-.11,.04,cz);for(let z=z0+1;z<z1-1;z+=3)B(.14,.075,1.4,0xffe066,x,.05,z)}
+B(158,.05,.6,0xbdbdbd,111,.025,10);B(158,.05,.6,0xbdbdbd,111,.025,15);road(32,190,12.5,4.4);
+road(162,228,29.8,3.4);road(162,228,37.6,3.4);vroad(194,29.8,46,3.4);vroad(183.2,18,29.8,2.6);vroad(204.75,18,29.8,2.6);vroad(160.6,29.8,37.6,2.4);vroad(229.4,29.8,37.6,2.4);
+const WC=[0xf6d6a5,0xe9c46a,0xa8dadc,0xf4a261,0xd7b6e0,0xc8e0a0,0xe5989b,0x8ecae6],RC2=[0xb23a48,0x7a3b2e,0x3b5d8a,0x2d6a1f,0x6d4c2f];
+function cot(cx,cz,fz,k){const w=4.6,d=4,h=3,g=G(cx,0,cz);if(fz<0)g.rotation.y=Math.PI;
+ B(w,h,d,0,0,h/2,0,g).material=TM(WC[k%8],k%3?TWOOD:TBRICK);const r=Cn(w*.78,2,0,0,h+1,0,g,4);r.rotation.y=Math.PI/4;r.scale.z=d/w*.95;r.material=TM(RC2[k%5],TROOF);
+ B(1,1.9,.1,0x5a3825,0,.95,d/2+.02,g);[-1,1].forEach(x=>B(.9,.9,.1,0,x*1.5,1.8,d/2+.02,g).material=winM);B(.6,1.1,.6,0x7a4b3a,1.4,h+.8,-.6,g)}
+{let k=0;const xs=[164.5,172,179.5,187,201,208.5,216,223.5];[[25.9,1],[33.7,1],[41.3,-1]].forEach(([z,fz])=>xs.forEach(x=>{if(k<20){cot(x,z,fz,k);k++}}))}
+const FEN=[{h:1,c:284,a:0,b:400,g:[[145,165]]},{h:0,c:157,a:360,b:480,g:[]},{h:1,c:478,a:0,b:320,g:[]}];
+let PX=P.x,PY=P.y,fenTs=0;
+function fenceFix(){if(IN){PX=P.x;PY=P.y;return}
+ if(Math.abs(P.x-PX)<45&&Math.abs(P.y-PY)<45){let hit=0;
+  for(const f of FEN){
+   if(f.h){if((PY<f.c)!==(P.y<f.c)&&P.x>=f.a&&P.x<=f.b&&!f.g.some(g=>P.x>g[0]&&P.x<g[1])){P.y=PY;hit=1}}
+   else if((PX<f.c)!==(P.x<f.c)&&P.y>=f.a&&P.y<=f.b){P.x=PX;hit=1}}
+  if(hit){P.tx=null;P.act=null;DV=0;const n=performance.now();if(n-fenTs>2500){fenTs=n;toast('🚧 Огорожа! Йди через ворота або обійди')}}}
+ PX=P.x;PY=P.y}
+
+// ===== remote farms, mountains, void for rooms =====
+let OX=0,OY=0;
+S.fm=S.fm||[0,0,0];S.ft=S.ft||[0,0,0];
+for(let x=300;x<900;x+=16){const h=9+rnd()*8;Cn(h*.8,h,x%32?0x5fb264:0x6bbf6f,x,h/2,-10-(x%3)*2,scene,6)}
+const voidP=new THREE.Mesh(new THREE.PlaneGeometry(90,90),new THREE.MeshBasicMaterial({color:0x1d1e33}));voidP.rotation.x=-Math.PI/2;voidP.position.set(104,-.01,104);voidP.visible=false;scene.add(voidP);
+// 2.6: long roads — dashed centre line (instanced), clean edges
+function dashI(n,w,d,x,z,dx,dz){if(n<1)return;const m=new THREE.InstancedMesh(new THREE.BoxGeometry(w,.075,d),M(0xffe066),n),o=new THREE.Object3D();for(let i=0;i<n;i++){o.position.set(x+dx*i,.05,z+dz*i);o.updateMatrix();m.setMatrixAt(i,o.matrix)}scene.add(m)}
+function roadL(x0,x1,z,w){const L=x1-x0,cx=(x0+x1)/2;[B(L,.06,w,0x4a4a50,cx,.03,z),B(L,.07,.22,0xd8d8d8,cx,.04,z-w/2+.11),B(L,.07,.22,0xd8d8d8,cx,.04,z+w/2-.11)].forEach(m=>m.castShadow=false);dashI(Math.floor((L-3)/3),1.4,.14,x0+1.7,z,3,0)}
+function vroadL(x,z0,z1,w){const L=z1-z0,cz=(z0+z1)/2;[B(w,.06,L,0x4a4a50,x,.03,cz),B(.22,.07,L,0xd8d8d8,x-w/2+.11,.04,cz),B(.22,.07,L,0xd8d8d8,x+w/2-.11,.04,cz)].forEach(m=>m.castShadow=false);dashI(Math.floor((L-3)/3),.14,1.4,x,z0+1.7,0,3)}
+roadL(216,806,12.5,4.4);vroadL(680,14.7,306,4.4);vroadL(560,14.7,346,4.4);
+function farm3(f){const g=G(f.x,0,f.z);B(26,.05,22,0x6fb25a,0,.03,0,g);
+ const h=G(-6,0,-3,g);B(5.6,3,4.4,0,0,1.5,0,h).material=TM(0xf6d6a5,TWOOD);const r=Cn(4.4,2,0,0,4,0,h,4);r.rotation.y=Math.PI/4;r.scale.z=.78;r.material=TM(0xb23a48,TROOF);B(1,1.9,.1,0x5a3825,0,.95,2.22,h);[-1.6,1.6].forEach(x=>B(.9,.9,.1,0,x,1.8,2.22,h).material=winM);
+ const b=G(6,0,-4,g);B(7,3.6,5,0,0,1.8,0,b).material=TM(0xc1121f,TWOOD);const br=Cn(5.4,2.4,0,0,4.8,0,b,4);br.rotation.y=Math.PI/4;br.scale.z=.72;br.material=TM(0x7a0c14,TROOF);B(2.4,2.4,.1,0x5a1a1a,0,1.2,2.52,b);
+ for(let i=0;i<3;i++){const px=-6+i*5.2;B(4.4,.12,3.6,0x7b5a2a,px,.1,6,g);B(4,.7,3.2,0xe0b83a,px,.45,6,g)}
+ B(.3,2.6,.3,0x8b5e3c,-2,1.3,10.2,g);B(.3,2.6,.3,0x8b5e3c,2,1.3,10.2,g);B(4.6,.5,.2,0x5a3825,0,2.6,10.2,g);return g}
+FARMS.forEach(farm3);
+const stor=i=>{const f=FARMS[i];return S.fm[i]?Math.min(f.cap,Math.floor((Date.now()-S.ft[i])/1000/f.rate)):0};
+function farmTick(){voidP.visible=IN;if(IN)return;lab('🏘 Липівка',V(1242,7,13));
+ FARMS.forEach((f,i)=>lab('🏡 Ферма '+f.n+' · '+(S.fm[i]?stor(i)+'/'+f.cap+' '+f.e:f.price+' 🪙'),V(f.x,6.2,f.z)));
+ let best=1e9,bi=0;FARMS.forEach((f,i)=>{const d=Math.hypot(P.x/10-f.x,P.y/10-f.z)*10;if(d<best){best=d;bi=i}});
+ const m=best/70/60,tx='🧭 Ферма '+FARMS[bi].n+': ≈'+(m<.2?'тут':m.toFixed(1)+' хв')+' · 🏘 Липівка ≈'+(Math.hypot(P.x-12420,P.y-130)/70/60).toFixed(1)+' хв пішки';if(farmTick.s!==tx){farmTick.s=tx;$('nav').textContent=tx}}
+function openFarm(i){const f=FARMS[i],own=S.fm[i];
+ showCard('<h2>🏡 Ферма '+f.n+'<button class="x" onclick="closeCard()">X</button></h2>'+(own?`<div class="sum">Склад: ${stor(i)} з ${f.cap} ${f.e}</div><p style="font-size:12px">Ферма сама виробляє ${f.e} кожні ${f.rate} с. Приходь, забирай і продавай.</p><button class="big" ${stor(i)?'':'disabled'} onclick="takeFarm(${i})">Забрати ${stor(i)} ${f.e}</button>`:`<p style="font-size:13px">Купи цю ферму: вона виробляє ${f.e} (1 шт. кожні ${f.rate} с, склад до ${f.cap}).</p><button class="big" ${S.coins<f.price?'disabled':''} onclick="buyFarm(${i})">Купити за ${f.price} 🪙</button>`))}
+window.buyFarm=i=>{const f=FARMS[i];if(S.coins<f.price)return;S.coins-=f.price;S.fm[i]=1;S.ft[i]=Date.now();ui();save();openFarm(i);toast('🏡 Ферму куплено!')};
+window.takeFarm=i=>{const n=stor(i),f=FARMS[i];if(!n)return;S.inv[f.id]=(S.inv[f.id]||0)+n;S.ft[i]=Date.now();ui();save();openFarm(i);toast('+'+n+' '+f.e)};
+const _ar3=arrive;arrive=function(a){if(a.k==='farm')return openFarm(a.i);return _ar3(a)};
+
+// ===== Lypivka (far town), traffic, steering fix =====
+for(let x=900;x<1420;x+=16){const h=9+rnd()*8;Cn(h*.8,h,x%32?0x5fb264:0x6bbf6f,x,h/2,-10-(x%3)*2,scene,6)}
+roadL(806,1330,12.5,4.4);
+road(1210,1276,29.8,3.4);road(1210,1276,37.6,3.4);vroad(1242,29.8,46,3.4);vroad(1231.2,18,29.8,2.6);vroad(1252.75,18,29.8,2.6);vroad(1208.6,29.8,37.6,2.4);vroad(1277.4,29.8,37.6,2.4);
+B(45,.05,9,0x8a8a8a,1242,.03,13.5);Cy(2.2,2.4,.6,0x999999,1242,.3,19.5);Cy(.3,.3,2,0x999999,1242,1.2,19.5);Cy(1.8,1.8,.5,0x4da3e0,1242,.52,19.5);
+for(let x=1225;x<1260;x+=8){Cy(.07,.09,2.6,0x333333,x,1.3,9.7);Sp(.22,0,x,2.7,9.7).material=lampM}
+{let k=7;const L0=1048;[164.5,172,179.5,187,201,208.5,216,223.5].forEach(x=>cot(x+L0,25.9,1,k++));[164.5,172,179.5,187,201,208.5].forEach(x=>cot(x+L0,33.7,1,k++));[164.5,172,179.5,187].forEach(x=>cot(x+L0,41.3,-1,k++))}
+[{n:'🧔 Мер Левко',x:12420,y:150,t:'g',c:[0x5a3825,0x333344,0x888888],lines:['Вітаємо у Липівці!','Це найдальше містечко долини.']},
+ {n:'🧑‍🌾 Купець Остап',x:12300,y:160,buys:['truffle','milk','wool','egg','fish'],c:[0x8b5e3c,0x2b3a67,0xe9c46a],lines:['Привіт!']},
+ {n:'👩‍🍳 Пані Ярина',x:12560,y:150,buys:['bread','pie','roast','omelet','bakedm'],c:[0xff8fab,0x6d597a,0xffffff],lines:['Привіт!']}].forEach(n=>{n.wp=[[12250,150],[12400,150],[12560,150],[12420,210],[12330,330]];n.g=human(...n.c);scene.add(n.g);n.w=1;n.tx=n.x;n.ty=n.y;n.f=0;n.cd=0;NPCS.push(n)});
+// traffic: right-hand lanes, cars follow their road and keep distance
+const TR=[],CARC=[0xffd166,0x3a86ff,0x2a9d3f,0xe76f51,0x9d4edd,0xffffff,0x00b4d8,0xf4a261,0x8d99ae,0xe63946];
+function addCar(ax,c,a,b,s,d,vm,ln){const g=mkCar(CARC[TR.length%10]);scene.add(g);TR.push({g,ax,c,a,b,s,d,v:vm,vm,w:0,ln:ln||1.1})}
+addCar('x',12.5,34,800,80,1,11);addCar('x',12.5,34,800,300,-1,9);addCar('x',12.5,34,800,520,1,12);addCar('x',12.5,34,800,700,-1,10);addCar('x',12.5,34,800,140,-1,13);
+addCar('x',12.5,810,1320,900,1,12);addCar('x',12.5,810,1320,1100,-1,10);addCar('x',12.5,810,1320,1250,1,9);
+addCar('z',680,20,300,100,1,11);addCar('z',680,20,300,220,-1,9);addCar('z',560,20,340,80,1,10);addCar('z',560,20,340,250,-1,12);
+addCar('x',29.8,164,226,170,1,6,.85);addCar('x',37.6,164,226,210,-1,6,.85);addCar('x',29.8,1212,1274,1230,-1,6,.85);addCar('x',37.6,1212,1274,1260,1,6,.85);
+TC.forEach(c=>c.g.visible=false);
+function townTick(dt){TC.forEach(c=>c.g.visible=false);
+ TR.forEach(c=>{
+  if(c.w>0)c.w-=dt;else{let v=c.vm;
+   for(const o of TR){if(o===c||o.ax!==c.ax||o.c!==c.c||o.d!==c.d)continue;const gap=(o.s-c.s)*c.d;if(gap>0&&gap<8)v=Math.min(v,gap<4?0:o.v*.9)}
+   c.v+=(v-c.v)*Math.min(1,dt*2);c.s+=c.d*c.v*dt;
+   if(c.s>c.b){c.s=c.b;c.d=-1;c.w=1.5;c.v=0}else if(c.s<c.a){c.s=c.a;c.d=1;c.w=1.5;c.v=0}}
+  const x=c.ax==='x'?c.s:c.c-c.ln*c.d,z=c.ax==='x'?c.c+c.ln*c.d:c.s;
+  c.g.position.set(x,0,z);c.g.rotation.y=c.ax==='x'?(c.d>0?Math.PI/2:-Math.PI/2):(c.d>0?0:Math.PI);
+  c.g.visible=Math.abs(x-P.x/10)<160&&Math.abs(z-P.y/10)<160})}
+// steering: speed-sensitive, smoothed, no spinning at high speed
+let STV=0;
+function drive(dt){const sp=$('spd');if(!P.veh||IN){DV=0;STV=0;sp.style.display='none';return}
+ const mx=VT[P.veh].sp+35*(S.vspd||0),th=(KS.g||keys.arrowup||keys.w?1:0)-(KS.b||keys.arrowdown||keys.s?1:0),st=(KS.r||keys.arrowright||keys.d?1:0)-(KS.l||keys.arrowleft||keys.a?1:0);
+ if(th||st){P.tx=null;P.act=null}
+ STV+=(st-STV)*Math.min(1,dt*5);
+ if(th||st||(P.tx==null&&Math.abs(DV)>3)){
+  if(th>0)DV+=dt*(VT[P.veh].cl==='c'?170:140);else if(th<0)DV-=dt*(DV>0?340:90);else DV-=Math.sign(DV)*Math.min(Math.abs(DV),dt*80);
+  DV=Math.max(-mx*.4,Math.min(mx,DV));
+  const sf=Math.min(1,Math.abs(DV)/mx),rate=(1.9-1.3*sf)*Math.min(1,Math.abs(DV)/40);
+  DH-=STV*rate*dt*Math.sign(DV||1);
+  P.x=Math.max(8,Math.min(WW-8,P.x+Math.sin(DH)*DV*dt));P.y=Math.max(84,Math.min(WH-4,P.y+Math.cos(DH)*DV*dt))}
+ else if(P.tx!=null){DV=0;let d=Math.atan2(P.tx-P.x,P.ty-P.y)-DH;d=Math.atan2(Math.sin(d),Math.cos(d));DH+=d*Math.min(1,dt*4)}
+ sp.style.display='block';sp.textContent='⚡ '+Math.round(Math.abs(DV)*.4)+' км/год'}
+
+// ===== 2.5 «Велика долина»: roads everywhere, villages, bigger home farm, forests, lakes, more farms =====
+ROADS.forEach(r=>r.h?roadL(r.a,r.b,r.c,r.w||4.4):vroadL(r.c,r.a,r.b,r.w||4.4));
+// 2.6: clean junctions — asphalt patches hide stray edge lines / dashes where roads cross or meet
+{const HR=ROADS.filter(r=>r.h).concat([{c:12.5,a:32,b:1330,w:4.4}]),VR=ROADS.filter(r=>!r.h).concat([{c:680,a:14.7,b:306,w:4.4},{c:560,a:14.7,b:346,w:4.4}]);
+ HR.forEach(h=>VR.forEach(v=>{if(v.c>=h.a-3&&v.c<=h.b+3&&h.c>=v.a-3&&h.c<=v.b+3){const m=B(v.w||4.4,.08,h.w||4.4,0x4a4a50,v.c,.06,h.c);m.castShadow=false}}))}
+function cot2(cx,cz,ry,k){const w=4.6,d=4,h=3,g=G(cx,0,cz);g.rotation.y=ry;
+ B(w,h,d,0,0,h/2,0,g).material=TM(WC[k%8],k%3?TWOOD:TBRICK);const r=Cn(w*.78,2,0,0,h+1,0,g,4);r.rotation.y=Math.PI/4;r.scale.z=d/w*.95;r.material=TM(RC2[k%5],TROOF);
+ B(1,1.9,.1,0x5a3825,0,.95,d/2+.02,g);[-1,1].forEach(x=>B(.9,.9,.1,0,x*1.5,1.8,d/2+.02,g).material=winM);B(.6,1.1,.6,0x7a4b3a,1.4,h+.8,-.6,g)}
+const lamp=(x,z)=>{Cy(.07,.09,2.6,0x333333,x,1.3,z);Sp(.22,0,x,2.7,z).material=lampM};
+const VN=[['Березівка','H',480,92],['Яблунівка','H',290,180],['Калинівка','H',940,180],['Дубки','H',760,260],['Хутір Лісовий','H',290,260],['Вербівка','V',900,110],['Заріччя','V',1100,200],['Сонячне','H',1120,92]];
+const NPN=['👨‍🌾 Фермер Іван','👵 Баба Ганна','👴 Дід Микола','👩 Пані Оксана','🧑 Тарас','👧 Катруся','🧔 Грицько','👩‍🌾 Марічка'];
+const NPL=['Добрий день, сусіде!','Гарна сьогодні погода.','У нас тут тихо і затишно.','Заходь у гості!','Кажуть, на сході є нові ферми.'];
+VN.forEach(([nm,o,a,b],vi)=>{for(let i=0;i<5;i++){const t=a+i*7;
+  if(o==='H'){cot2(t,b-5.4,0,vi*2+i);cot2(t,b+5.4,Math.PI,vi*2+i+3);if(i%2==0)lamp(t+3.5,b-3.1)}
+  else{const z=b+i*7;cot2(a-5.4,z,Math.PI/2,vi*2+i);cot2(a+5.4,z,-Math.PI/2,vi*2+i+3);if(i%2==0)lamp(a-3.1,z+3.5)}}
+ for(let j=0;j<2;j++){const p=o==='H'?[[a*10,(b-3.4)*10],[(a+28)*10,(b+3.4)*10]]:[[(a-3.4)*10,b*10],[(a+3.4)*10,(b+28)*10]];
+  const n={n:NPN[(vi+j*3)%8],x:p[j][0],y:p[j][1],c:[[0xe63946,0x3a86ff,0xe9c46a],[0x2a9d3f,0x6d4c2f,0xffffff],[0x8338ec,0x2b3a67,0xf4a261]][(vi+j)%3],lines:[NPL[(vi+j)%5],'Ласкаво просимо до села '+nm+'!']};
+  if((vi+j)%3===0)n.buys=['egg','milk','wool','wheat','mush','berry'];
+  n.wp=o==='H'?[[a*10-20,(b-3.4)*10],[(a+28)*10+20,(b-3.4)*10],[(a+28)*10+20,(b+3.4)*10],[a*10-20,(b+3.4)*10]]:[[(a-3.4)*10,b*10-20],[(a-3.4)*10,(b+28)*10+20],[(a+3.4)*10,(b+28)*10+20],[(a+3.4)*10,b*10-20]];
+  n.g=human(...n.c);scene.add(n.g);n.w=1;n.tx=n.x;n.ty=n.y;n.f=0;n.cd=0;NPCS.push(n)}});
+// roadside stops
+{const g=G(440,0,100);B(6,3,4,0xeeeeee,0,1.5,0,g);B(10,.3,7,0xe63946,0,3.4,2,g);[-4,4].forEach(x=>B(.3,3.4,.3,0x999999,x,1.7,5,g));[-2,2].forEach(x=>B(.7,1.5,.7,0x333333,x,.75,3.4,g));B(1.2,1.9,.1,0x5a3825,-1.5,.95,2.02,g)}
+{const g=G(909,0,99);B(5,2.8,4,0xd9a066,0,1.4,0,g);B(6,.3,5,0xb23a48,0,3,0,g);[[-1.6,2.4],[0,2.4],[1.6,2.4]].forEach(([x,z])=>{Cy(.6,.6,.1,0xffffff,x,.9,z+.8,g);Cy(.08,.08,.9,0x888888,x,.45,z+.8,g)})}
+// home farm: silo, hay (the well in the garden was removed in 2.6)
+{const g=G(33.5,0,30);Cy(1.3,1.3,5,0xd9d9d9,0,2.5,0,g);Cn(1.5,1.2,0xb23a48,0,5.6,0,g,8);B(.7,1.2,.1,0x5a3825,0,.6,1.3,g)}
+[[2,31],[2,34],[4.5,32],[14,45],[10,46],[30,45]].forEach(([x,z])=>{B(1.4,1,1.2,0xe0c060,x,.5,z);B(1.4,.1,1.2,0xc9a640,x,1.05,z)});
+NPCS.forEach(n=>{if(!n.wp&&n.x<320&&n.y>100&&n.y<280){n.x=n.tx=240+Math.random()*60;n.y=n.ty=95}});
+// forests: deciduous & birch, bushes, rocks, lakes
+function forestB(N,x0,x1,z0,z1,birch){const tr=new THREE.InstancedMesh(new THREE.CylinderGeometry(.18,.26,2,6),M(birch?0xeeeeee:0x7b4a2a),N),f1=new THREE.InstancedMesh(new THREE.SphereGeometry(1.3,8,6),FM[1],N),f2=new THREE.InstancedMesh(new THREE.SphereGeometry(.9,7,5),FM[0],N),d=new THREE.Object3D();let n=0;
+ for(let a=0;a<N*5&&n<N;a++){const x=x0+rnd()*(x1-x0),z=z0+rnd()*(z1-z0);if(bad2(x,z))continue;const q=.8+rnd()*.9;d.rotation.y=rnd()*6;d.scale.setScalar(q);
+  d.position.set(x,q,z);d.updateMatrix();tr.setMatrixAt(n,d.matrix);d.position.set(x,2.9*q,z);d.updateMatrix();f1.setMatrixAt(n,d.matrix);d.position.set(x+.4*q,3.7*q,z);d.updateMatrix();f2.setMatrixAt(n,d.matrix);n++}
+ tr.count=f1.count=f2.count=n;f1.castShadow=f2.castShadow=true;scene.add(tr,f1,f2)}
+forestB(260,262,900,96,350,0);forestB(220,900,1400,100,350,1);forestB(150,430,890,2,92,1);
+function scat(N,geo,mat,sy,x0,x1,z0,z1){const m=new THREE.InstancedMesh(geo,mat,N),d=new THREE.Object3D();let n=0;
+ for(let a=0;a<N*5&&n<N;a++){const x=x0+rnd()*(x1-x0),z=z0+rnd()*(z1-z0);if(bad2(x,z))continue;const q=.6+rnd()*.9;d.rotation.y=rnd()*6;d.scale.set(q,q*sy,q);d.position.set(x,.3*q,z);d.updateMatrix();m.setMatrixAt(n,d.matrix);n++}
+ m.count=n;m.castShadow=true;scene.add(m)}
+scat(400,new THREE.SphereGeometry(.6,6,5),FM[1],.8,40,1400,5,355);scat(300,new THREE.DodecahedronGeometry(.6),new THREE.MeshLambertMaterial({color:0x8d8d8d}),.7,40,1400,5,355);
+LK2.forEach(([cx,cz,r])=>{Cy(r,r,.15,0x4da3e0,cx,.08,cz);Cy(r+.6,r+.6,.1,0x5a8f4a,cx,.04,cz);LAKES.push({x:cx*10,y:cz*10,r:r*10,sx:cx*10,sy:(cz+r+1.5)*10,bx:cx,bz:cz+r-1.5})});
+// more traffic on the new roads
+[['x',92,260,1320,300,1,12],['x',92,260,1320,900,-1,10],['x',180,260,1320,500,1,11],['x',180,260,1320,1100,-1,12],['x',260,260,1320,400,-1,10],['x',260,260,1320,1000,1,13],['x',356,260,1320,700,1,11],['x',356,260,1320,1200,-1,9],['z',250,20,350,200,1,11],['z',250,20,350,100,-1,10],['z',420,20,350,300,1,12],['z',900,20,350,150,-1,11],['z',1100,20,350,250,1,10],['z',1330,20,350,100,1,12]].forEach(a=>addCar(...a));
+// labels near villages and stops
+const _ft=farmTick;farmTick=function(){_ft();if(IN)return;VN.forEach(([nm,o,a,b])=>{const cx=o==='H'?a+14:a,cz=o==='H'?b:b+14;if(Math.hypot(P.x/10-cx,P.y/10-cz)<70)lab('🏘 '+nm,V(cx,6.5,cz))});
+ if(Math.hypot(P.x/10-440,P.y/10-100)<70)lab('⛽ АЗС',V(440,5,100));if(Math.hypot(P.x/10-909,P.y/10-99)<70)lab('☕ Кафе',V(909,4.5,99));
+ if(Math.hypot(P.x/10-33.5,P.y/10-30)<60)lab('🌾 Силос',V(33.5,6.6,30))};
+// ===== 2.6 «Техномаркет»: vehicle shop you can walk into =====
+const VT={car:{n:'🚗 Твоя машина',cl:'c',sp:230},
+ tractor:{n:'🚜 Трактор',cl:'t',sp:115,r:26,cost:400,need:2,d:'сам садить насіння'},
+ tractor2:{n:'🚜 Трактор «Турбо»',cl:'t',sp:150,r:34,cost:2500,need:3,d:'садить швидше й ширше'},
+ tractor3:{n:'🚜 Гусеничний «Гігант»',cl:'t',sp:130,r:46,cost:9000,need:4,d:'садить дуже широко'},
+ combine:{n:'🌾 Комбайн',cl:'h',sp:115,r:26,y:1,cost:1000,need:3,d:'сам збирає урожай'},
+ combine2:{n:'🌾 Комбайн «Профі»',cl:'h',sp:140,r:34,y:2,cost:6000,need:4,d:'збирає ×2 урожаю'},
+ combine3:{n:'🌾 Мега-комбайн',cl:'h',sp:160,r:46,y:3,cost:20000,need:5,d:'збирає ×3 урожаю'},
+ truck:{n:'🚚 Вантажівка',cl:'k',sp:250,cost:3000,need:2,d:'швидка вантажна'},
+ truck2:{n:'🚛 Фура',cl:'k',sp:300,cost:12000,need:3,d:'найшвидша вантажівка'},
+ bus:{n:'🚌 Автобус',cl:'c',sp:240,cost:5000,need:2,d:'великий жовтий автобус'},
+ quad:{n:'🏍 Квадроцикл',cl:'c',sp:200,cost:900,need:1,d:'малий і прудкий'},
+ pickup:{n:'🛻 Пікап',cl:'c',sp:270,cost:2000,need:1,d:'фермерський пікап'},
+ jeep:{n:'🚙 Позашляховик',cl:'c',sp:290,cost:4500,need:2,d:'для будь-яких доріг'},
+ sport:{n:'🏎 Спорткар',cl:'c',sp:380,cost:15000,need:3,d:'найшвидший у долині'}};
+const tint=(g,a,b)=>g.traverse(o=>{if(o.isMesh&&o.material.color&&o.material.color.getHex()===a)o.material=M(b)});
+function mkTruck(cab,box,L){const g=G(0,0,0);B(2.2,1.7,1.9,cab,0,1.5,L/2+1,g);B(1.9,.8,.1,0x9fd8f0,0,1.9,L/2+2,g);B(2.3,.3,L,0x444444,0,.8,0,g);B(2.4,2.2,L-.4,box,0,2.1,-.25,g);[-1,1].forEach(x=>[L/2+.8,L/2-1,-L/2+1.2,-L/2+2.6].forEach(z=>wh(.6,.4,x*1.1,.6,z,g)));B(.4,.25,.1,0xfff2b0,.7,.9,L/2+2,g);B(.4,.25,.1,0xfff2b0,-.7,.9,L/2+2,g);return g}
+function mkBus(){const g=G(0,0,0);B(2.3,2.3,7,0xffd166,0,1.6,0,g);B(2.32,.7,6.4,0x9fd8f0,0,2.2,0,g);B(2.35,.1,7.02,0xd62828,0,1,0,g);[-1,1].forEach(x=>[-2.3,2.3].forEach(z=>wh(.55,.4,x*1.1,.55,z,g)));B(.4,.25,.1,0xfff2b0,.8,.9,3.52,g);B(.4,.25,.1,0xfff2b0,-.8,.9,3.52,g);return g}
+const MKV={
+ tractor2:()=>{const g=mkT();tint(g,0xd62828,0x1d6fd6);g.scale.setScalar(1.2);return g},
+ tractor3:()=>{const g=mkT();tint(g,0xd62828,0xf77f00);[-1,1].forEach(x=>B(.55,.8,3,0x222222,x,.45,.2,g));g.scale.setScalar(1.4);return g},
+ combine2:()=>{const g=mkC();tint(g,0x2a9d3f,0xd62828);g.scale.setScalar(1.15);return g},
+ combine3:()=>{const g=mkC();tint(g,0x2a9d3f,0x6a4cc9);g.scale.setScalar(1.35);return g},
+ truck:()=>mkTruck(0xe63946,0xeeeeee,5),truck2:()=>mkTruck(0x2a6fd6,0xf4f4f4,8),bus:()=>mkBus(),
+ quad:()=>{const g=mkCar(0xe76f51);g.scale.setScalar(.6);return g},
+ pickup:()=>{const g=mkCar(0x3a86ff);B(1.5,.5,1.4,0x1d5fc9,0,1.05,-1.2,g);g.scale.setScalar(1.1);return g},
+ jeep:()=>{const g=mkCar(0x2a6f3a);B(1.2,.1,1.2,0x222222,0,1.65,-.2,g);g.scale.setScalar(1.25);return g},
+ sport:()=>{const g=mkCar(0xffd60a);g.scale.set(1,.75,1.05);return g}};
+const SLK=Object.keys(VT).filter(k=>!VEH[k]);
+SLK.forEach((k,i)=>{const g=MKV[k]();VEH[k]={g,x:650+(i%6)*38,y:250+Math.floor(i/6)*34,reel:g.reel}});
+B(24,.06,10,0x5a5a62,74.5,.03,28.5).castShadow=false;B(1.6,2.2,.12,0x5a3825,0,1.1,2.62,sg);
+RM.tech=mkRoom(0xb7c0cc,0xe3eaf2);
+[[MKV.tractor2,1.7,3.4,.42,.6],[MKV.combine2,6.3,3.4,.36,-.6],[()=>mkTruck(0xe63946,0xeeeeee,5),1.7,5.5,.3,.5],[MKV.sport,6.3,5.5,.45,-.5]].forEach(([f,x,z,s,r])=>{const m=f();m.scale.multiplyScalar(s);m.position.set(x,.05,z);m.rotation.y=r;RM.tech.add(m)});
+RHIT.tech=[{x0:1020,x1:1060,y0:1004,y1:1030,gx:1040,gy:1036,k:'rtech'},{x0:1004,x1:1030,y0:1030,y1:1066,gx:1036,gy:1050,k:'rtech'},{x0:1050,x1:1076,y0:1030,y1:1066,gx:1044,gy:1050,k:'rtech'}];
+RLAB.tech=[['🛒 Каталог (тапни)',4,2.6,1.5],['🚜 Техномаркет',4,3.8,.6]];
+let TT='t';const TTB=[['t','🚜 Трактори'],['h','🌾 Комбайни'],['k','🚚 Фури'],['c','🚗 Авто'],['u','🔧 Тюнінг']];
+function openTech(t){TT=t||TT;
+ const tabs=`<div class="row2">${TTB.map(([k,n])=>`<button class="tb ${TT===k?'on':''}" onclick="openTech('${k}')">${n}</button>`).join('')}</div>`;let h;
+ if(TT==='u'){const c1=Math.round(300*Math.pow(2,S.vspd||0)),m1=(S.vspd||0)>=5,c2=Math.round(800*Math.pow(3,S.vrad||0)),m2=(S.vrad||0)>=3;
+  h=`<button class="up" ${m1||S.coins<c1?'disabled':''} onclick="tune(${c1})">⚡ Двигун (Lv${S.vspd||0}) — швидкість усієї техніки +14 км/год<br>${m1?'МАКСИМУМ':c1+' 🪙'}</button><button class="up" ${m2||S.coins<c2?'disabled':''} onclick="tuneR(${c2})">📐 Широка сівалка/жатка (Lv${S.vrad||0}) — зона роботи +25%<br>${m2?'МАКСИМУМ':c2+' 🪙'}</button>`}
+ else h=Object.entries(VT).filter(([k,v])=>v.cl===TT&&v.cost).map(([k,v])=>S.veh[k]?`<button class="up" disabled>${v.n} — є ✅</button>`:`<button class="up" ${S.house<v.need||S.coins<v.cost?'disabled':''} onclick="buyV('${k}',${v.cost})">${v.n}<br>${v.d} · ⚡${Math.round(v.sp*.4)} км/год<br>${S.house<v.need?'🔒 дім рівня '+v.need:v.cost+' 🪙'}</button>`).join('');
+ showCard(`<h2>🚜 Техномаркет<button class="x" onclick="closeCard()">X</button></h2>${tabs}<div class="sum">🪙 ${S.coins}</div>${h}<h4 style="font-size:11px">Куплена техніка чекає на стоянці за магазином 🅿️. Тапни по ній, щоб сісти.</h4>`)}
+window.openTech=openTech;
+window.buyV=(k,c)=>{if(S.coins<c||S.veh[k])return;S.coins-=c;S.veh[k]=1;ui();save();openTech();toast('Техніка чекає на стоянці! 🅿️')};
+window.tune=c=>{S.coins-=c;S.vspd=(S.vspd||0)+1;ui();save();openTech('u')};
+window.tuneR=c=>{S.coins-=c;S.vrad=(S.vrad||0)+1;ui();save();openTech('u')};
+const _ar4=arrive;arrive=function(a){if(a.k==='shop'){enterRoom('tech',700,163);toast('🚜 Техномаркет: тапни по прилавку або по техніці');return}if(a.k==='rtech')return openTech();return _ar4(a)};
+const _mount=mount;mount=function(k){_mount(k);if(P.veh===k)toast(VT[k].n+' — '+(VT[k].d||'їдь куди хочеш')+'. Тапни по собі, щоб зійти')};
+// input
+const ray=new THREE.Raycaster(),gp=new THREE.Plane(V(0,1,0),0),V2=new THREE.Vector2(),V3=V(0,0,0);
+function input(e){
+ const r=cv.getBoundingClientRect();V2.set((e.clientX-r.left)/r.width*2-1,-((e.clientY-r.top)/r.height)*2+1);ray.setFromCamera(V2,camr);
+ if(!ray.ray.intersectPlane(gp,V3))return;const mx=V3.x*10,my=V3.z*10;
+ if(IN&&ROOM!=='house'){if(e.type==='pointerdown'){if(my>1066)return go(1040,1074,{k:'idoor'});for(const q of RHIT[ROOM])if(mx>=q.x0&&mx<q.x1&&my>=q.y0&&my<q.y1)return go(q.gx,q.gy,{k:q.k})}return go(mx,my)}
+ if(IN){if(e.type==='pointerdown'){if(my>1066)return go(1040,1074,{k:'idoor'});if(mx<1032&&my<1032)return go(1020,1040,{k:'ibed'});if(mx>1038&&mx<1078&&my<1032)return go(1056,1040,{k:'itable'});if(mx<1024&&my>=1032&&my<1046)return go(1036,1040,{k:'iward'});if(mx<1022&&my>=1046&&my<1066)return go(1034,1056,{k:'roven'});if(mx>1062&&my>1034&&my<1066)return go(1050,1050,{k:'ishelf'})}return go(mx,my)}
+ if(e.type==='pointerdown'){
+  if(P.veh&&Math.hypot(mx-P.x,my-P.y)<16){dismount();return}
+  for(const k in VEH)if(S.veh[k]&&!P.veh&&Math.hypot(mx-VEH[k].x,my-VEH[k].y)<20)return go(VEH[k].x,VEH[k].y+16,{k:'veh',v:k});
+  for(const b of BLDS)if(mx>=b.x0&&mx<b.x1&&my>=b.y0&&my<b.y1)return go(b.gx,b.gy,{k:'bld',room:b.room,ex:b.ex,ey:b.ey});
+  for(let i=0;i<3;i++){const f=FLD[i];if(mx>f.x-10&&mx<f.x+200&&my>f.y-10&&my<f.y+190)return go(f.x+95,f.y+205,{k:'fbuy',i})}
+  for(const w of WILD)if(w.alive&&Math.hypot(mx-w.x,my-w.y+8)<16)return shoot(w);
+  for(let i=0;i<FARMS.length;i++){const q=FARMS[i];if(Math.hypot(mx-q.x*10,my-q.z*10)<110)return go(q.x*10,q.z*10+110,{k:'farm',i})}
+  for(const f of FG)if(!f.t&&Math.hypot(mx-f.x,my-f.y)<12)return go(f.x,f.y+8,{k:'forage',f});
+  if(Math.hypot(mx-cat.x,my-cat.y+6)<12){say('Мяу! 💕',cat.x,cat.y-16,'#ff8fab');return}
+  for(const a of S.an)if(Math.hypot(mx-a.x,my-a.y+6)<14)return go(a.x,a.y+4,{k:'animal'});
+  for(const n of NPCS)if(Math.hypot(mx-n.x,my-n.y+8)<15)return go(n.x,n.y+8,{k:'npc',n});
+  if(mx>650&&mx<750&&my>150&&my<230)return go(700,163,{k:'shop'});
+  if(mx>0&&mx<86&&my<86)return go(40,86,{k:'house'});
+  if(mx>100&&mx<178&&my<86)return go(138,86,{k:'kiosk'});
+  if(mx>222&&mx<306&&my>40&&my<96)return go(264,102,{k:'fish'});
+  if(mx>10&&mx<80&&my>290&&my<346)return go(45,352,{k:'coop'});
+  if(mx>236&&mx<312&&my>286&&my<346)return go(274,352,{k:'barn'});
+  for(let i=0;i<MAXP;i++){const {x,y}=pp(i);if(mx>=x&&mx<x+TW&&my>=y&&my<y+TH)return go(x+TW/2,y+TH+3,{k:'plot',i})}
+ }
+ go(mx,my);
+}
+// draw
+function draw(now,t){fenceFix();
+ const dt=Math.min(.05,t-(draw.lt||t));draw.lt=t;lbi=0;
+ const px=P.x*.1,pz=P.y*.1;player.position.set(px,0,pz);const pm=face(player,px,pz,dt);swing(player,pm,P.f);
+ if(P.fish>0){player.a[1].rotation.x=-2}
+ dogm.position.set(dog.x*.1,0,dog.y*.1);face(dogm,dog.x*.1,dog.y*.1,dt);
+ const tx=Math.max(8,Math.min(WW/10-8,px)),tz=Math.max(10,Math.min(WH/10-12,pz));
+ 
+ if(IN){camr.position.lerp(V(104,10.5,112),.1);camLook.lerp(V(104,0,104.5),.15)}else{camr.position.lerp(V(tx,13*ZM,tz+11*ZM),.1);camLook.lerp(V(tx,0,tz),.15)}camr.lookAt(camLook);
+ sun.position.set(px+15,25,pz+8);sun.target.position.set(px,0,pz);
+ const ph=t%900,night=ph<300?.55*Math.min(1,Math.min(ph,300-ph)/40):0,k=night/.55,sk=new THREE.Color(SKY[S.season||0]).lerp(new THREE.Color(0x0b1030),k);
+ scene.background=sk;scene.fog.color.copy(sk);hemi.intensity=.85-.55*k;sun.intensity=.9*(1-k);{const w=night>0&&night<.55?Math.sin(night/.55*Math.PI):0;sun.color.setRGB(1,.95-.3*w,.8-.4*w)}winM.emissive.setHex(night>.2?0xffc83a:0);lampM.emissive.setHex(night>.15?0xffcf5a:0);if(RAIN){hemi.intensity*=.75;sun.intensity*=.5;sk.lerp(new THREE.Color(0x7d8b99),.6);scene.fog.color.copy(sk)}if(IN){hemi.intensity=.9;sun.intensity=.6}
+ $('clk').textContent=(RAIN?(S.season===3?'❄️':'🌧'):night>.25?'🌙':'☀️')+' '+Math.ceil((ph<300?300-ph:900-ph)/60)+'хв';
+ hw.material=HM(['#d9a066','#c77d3f','#b5838d','#6fa8dc','#f6d365'][Math.min(S.house-1,4)]);
+ const kc=[0xe63946,0xf77f00,0x8338ec,0x06d6a0,0x3a86ff][Math.min(Math.floor((S.kiosk-1)/2),4)];st.forEach((m,i)=>m.material=M(i%2?0xffffff:kc));
+ PL.forEach((o,i)=>{const lk=i>=S.plots;o.soil.material=M(lk?0x5f8f5a:0x7b4a2a);const p=S.grid[i];let key='',prog=0;
+  if(p){const c=CROPS[p.c];prog=Math.min(1,(now-p.s)/1000*speed()/c.t);key=p.c+'-'+(prog<.25?0:prog<.6?1:prog<1?2:3)}
+  if(key!==o.key){o.key=key;while(o.cg.children.length)o.cg.remove(o.cg.children[0]);if(p)crop(o.cg,p.c,+key.split('-')[1])}
+  o.cg.position.y=.3+(key.endsWith('-3')?Math.abs(Math.sin(t*4))*.12:0);o.bar.visible=!!p&&prog<1;o.bar.scale.x=Math.max(.01,prog);
+  if(i===S.plots)lab('КУПИТИ '+plotCost()+'🪙',V(o.g.position.x,1.3,o.g.position.z))});
+ AM.forEach((m,a)=>{if(!S.an.includes(a)){scene.remove(m);AM.delete(a)}});
+ S.an.forEach(a=>{let m=AM.get(a);if(!m){m=mk(a.t);AM.set(a,m);scene.add(m)}
+  m.position.set(a.x*.1,0,a.y*.1);const mv=face(m,a.x*.1,a.y*.1,dt);m.position.y=mv?Math.abs(Math.sin(t*10))*.07:0;
+  if(ready(a))lab(ANIMALS[a.t].pe,V(a.x*.1,a.t==='cow'?2.4:1.7,a.y*.1),'bb')});
+ NPCS.forEach(n=>{let mv=false;if(n.w>0)n.w-=dt;else{const dx=n.tx-n.x,dy=n.ty-n.y,d=Math.hypot(dx,dy);
+  if(d<2){n.w=2+Math.random()*4;const L=n.wp||WP,w=L[Math.random()*L.length|0];n.tx=w[0];n.ty=w[1]}else{n.x+=dx/d*22*dt;n.y+=dy/d*22*dt;n.f+=dt*9}}
+  n.g.position.set(n.x*.1,0,n.y*.1);mv=face(n.g,n.x*.1,n.y*.1,dt);swing(n.g,mv,n.f);lab(n.n,V(n.x*.1,2.8,n.y*.1))});
+ cl.forEach((c,i)=>c.position.x=((t*.6+i*18)%70)-12);
+ bfl.forEach((b,i)=>{b.position.set(5+i*6+Math.sin(t*.7+i)*3,1.2+Math.sin(t*2+i)*.3,12+i*5+Math.cos(t*.9+i)*2);b.rotation.z=Math.sin(t*25+i)*.8});
+ if(P.fish>0){fl.visible=bob.visible=true;fl.geometry.setFromPoints([V(px+.5,1.9,pz+.2),FT]);bob.position.set(FT.x,.2+Math.sin(t*8)*.05,FT.z)}else fl.visible=bob.visible=false;
+ if(!IN){lab('🏠 ДІМ (зайти)',V(4.3,5.8,5.6));lab('🏪 КІОСК',V(13.9,5,6.3));lab('🐔 КУРНИК',V(4.4,4.8,32.3));lab('🐄 ФЕРМА',V(27.4,6,32.1));lab('🎣 Ставок',V(26.4,1.2,6.8));lab('🌾 Пшеничне поле',V(45,2.8,24));townLabs();lab('🚜 ТЕХНОМАРКЕТ (зайти)',V(70,5.4,20));lab('🅿️ Стоянка',V(74.5,1.8,28.5));lab('🚜 Техномаркет →',V(32,1.6,12.5))}
+ else if(ROOM!=='house'){lab('🚪 Вихід',IG(4,.8,7.6));RLAB[ROOM].forEach(([t,x,y,z])=>lab(t,IG(x,y,z)))}else{lab('🛏 Спати',IG(1.3,2.2,2));lab('📋 Стіл: прокачка',IG(6,2.2,1.6));lab('🏦 Банк',IG(7.4,3.8,5));lab('🚪 Вихід',IG(4,.8,7.6));lab('👕 Шафа: одяг',IG(.75,3,3.7));lab('🔥 Піч',IG(1,2,5.2))}
+ player.visible=!P.veh;
+ if(P.veh&&!IN){let ch=0;const nw=Date.now();
+  for(let i=0;i<S.plots;i++){const q=pp(i),cx=q.x+23,cy=q.y+18;if(Math.hypot(P.x-cx,P.y-cy)>(VT[P.veh].r||0)*(1+.25*(S.vrad||0)))continue;const p=S.grid[i];
+   if(VT[P.veh].cl==='t'&&!p){const c=CROPS[S.sel];if(S.house>=c.need&&S.coins>=c.cost){S.coins-=c.cost;S.grid[i]={c:S.sel,s:nw};say('🌱 -'+c.cost,cx,cy-10,'#ff9e9e');ch=1}}
+   if(VT[P.veh].cl==='h'&&p&&(nw-p.s)/1000*speed()>=CROPS[p.c].t){const c=CROPS[p.c];const yy=VT[P.veh].y||1;S.inv[c.id]=(S.inv[c.id]||0)+yy;S.grid[i]=null;say('+'+yy+' '+c.e,cx,cy-10);ch=1}}
+  if(VT[P.veh].cl==='h')S.wheat.forEach((w,i)=>{const wx=360+(i%4)*46+21,wy=150+(i>>2)*44+19;if(Math.hypot(P.x-wx,P.y-wy)<30&&(nw-w)/1000*speed()>=30){S.wheat[i]=nw;S.inv.wheat=(S.inv.wheat||0)+3;say('+3 🌾',wx,wy-10);ch=1}});
+  if(VT[P.veh].cl==='h')FLD.forEach((f,fi)=>{if(!S.fx[fi])return;S.fw[fi].forEach((w,i)=>{const wx=f.x+(i%4)*46+21,wy=f.y+(i>>2)*44+19;if(Math.hypot(P.x-wx,P.y-wy)<30&&(nw-w)/1000*speed()>=30){S.fw[fi][i]=nw;S.inv.wheat=(S.inv.wheat||0)+3;say('+3 🌾',wx,wy-10);ch=1}})});
+  if(ch){ui();save()}}
+ WF.forEach((o,i)=>{const pr=Math.min(1,(Date.now()-S.wheat[i])/1000*speed()/30);o.m.scale.y=.15+.85*pr;o.m.position.y=.15+.5*o.m.scale.y;o.m.material=M(pr<1?0x8fbf4a:0xe0b83a);o.m.rotation.z=pr>=1?Math.sin(t*3+i)*.025:0});
+ for(const k in VEH){const v=VEH[k];v.g.visible=!!S.veh[k]&&!IN;if(P.veh===k){v.x=P.x;v.y=P.y}v.g.position.set(v.x*.1,0,v.y*.1);const mv=face(v.g,v.x*.1,v.y*.1,dt,4);if(P.veh===k)v.g.rotation.y=DH;
+  if(v.reel)v.reel.rotation.x+=dt*(mv?9:1.5);if(S.veh[k]&&!P.veh&&!IN)lab(VT[k].n,V(v.x*.1,3.4,v.y*.1))}
+ for(let i=floats.length-1;i>=0;i--){const f=floats[i];f.a+=dt;if(f.a>1){floats.splice(i,1);continue}lab(f.t,V(f.x*.1,2.8+f.a*1.5,f.y*.1),'',1-f.a,f.c)}
+ for(let i=lbi;i<LB.length;i++)LB[i].style.display='none';
+ drive(dt);fenceFix();farmTick();minimap(now);catUpdate(dt);atmo(dt,t,night,px,pz);worldTick(dt);{const on=P.veh&&!IN?'block':'none';joy.style.display='none';['bl','br','bg','bb'].forEach(i=>$(i).style.display=on);$('bag').style.display=$('run').style.display=on=='block'?'none':'block';$('exitv').style.display=on;$('horn').style.display=on;$('zin').style.display=$('zout').style.display=IN?'none':'block'}
+ ren.render(scene,camr);
+}
+let bmsg='';
+function menuOld(v){
+ const m=$('menu');m.style.display='flex';
+ if(v==='bank'){const av=5000-S.debt;
+  m.innerHTML=`<div class="mc"><h1>💳 БАНК</h1><p>Монети: ${S.coins} 🪙<br>Борг: <b>${S.debt} 🪙</b><br><small>Кредит +20% одразу, далі +3% щохвилини гри. Ліміт боргу 5000.</small>${bmsg?'<br><b>'+bmsg+'</b>':''}</p>
+  ${[100,500,2000].map(a=>`<button class="mb g" ${a>av?'disabled':''} onclick="loan(${a})">Взяти ${a} 🪙<br><small>повернути ${Math.round(a*1.2)}</small></button>`).join('')}
+  ${[50,300].map(a=>`<button class="mb" ${S.debt&&S.coins?'':'disabled'} onclick="repay(${a})">Повернути ${a} 🪙</button>`).join('')}
+  <button class="mb" ${S.debt&&S.coins?'':'disabled'} onclick="repay(1e9)">Повернути все, що можу</button>
+  <button class="mb r" onclick="bmsg='';menu('main')">← Назад</button></div>`;return}
+ m.innerHTML=`<div class="mc"><h1 style="font-size:24px;line-height:1.1">🐱 CAT FARMING<br>SIMULATOR</h1><p>🪙 ${S.coins}${S.debt?' &nbsp; 💳 борг '+S.debt:''} &nbsp; 🏠${S.house} 🏪${S.kiosk}</p>
+  <button class="mb g" onclick="$('menu').style.display='none'">▶ ГРАТИ</button>
+  <button class="mb" onclick="menu('bank')">💳 КРЕДИТ</button>
+  <button class="mb r" onclick="if(confirm('Почати заново? Прогрес буде втрачено.')){S=fresh();dress();save();ui();menu('main')}">Нова гра</button></div>`;
+}
+
+window.loan=a=>{S.coins+=a;S.debt+=Math.round(a*1.2);bmsg='Отримано '+a+' 🪙';ui();save();menu('bank')};
+window.repay=n=>{n=Math.min(n,S.debt,S.coins);if(n<=0)return;S.coins-=n;S.debt-=n;bmsg=S.debt?'Повернуто '+n+' 🪙':'Борг сплачено! 🎉';ui();save();menu('bank')};
+
+// ===== 2.7 «Горизонт»: landscape start =====
+const touchy=matchMedia('(pointer:coarse)').matches||'ontouchstart' in window;let rotSkip=false,fsTried=false;
+function chkRot(){const r=$('rot');if(r)r.style.display=(touchy&&!rotSkip&&innerHeight>innerWidth)?'flex':'none'}
+function lockLand(){try{const o=screen.orientation;if(o&&o.lock){const q=o.lock('landscape');if(q&&q.catch)q.catch(()=>{})}}catch(e){}}
+function goLand(){if(!touchy)return;lockLand();if(fsTried||document.fullscreenElement)return;fsTried=true;const el=document.documentElement,rq=el.requestFullscreen||el.webkitRequestFullscreen;
+ if(rq){try{const q=rq.call(el);if(q&&q.then)q.then(lockLand).catch(()=>{})}catch(e){}}}
+addEventListener('resize',chkRot);addEventListener('orientationchange',()=>setTimeout(chkRot,250));
+document.addEventListener('pointerup',goLand,true);document.addEventListener('click',goLand,true);
+$('rotok').onclick=()=>{rotSkip=true;chkRot()};chkRot();lockLand();
+fit();ui();menu('main');introShow();requestAnimationFrame(frame);setInterval(ui,1500);
+</script></body></html>
